@@ -1577,6 +1577,7 @@ dependencies = [
 name = "transit"
 version = "0.1.0"
 dependencies = [
+ "rand 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "three 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
