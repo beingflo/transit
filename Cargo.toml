@@ -5,3 +5,4 @@ authors = ["Florian Marending <marending.florian@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+three = "0.4.0"
