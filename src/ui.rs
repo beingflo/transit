@@ -17,7 +17,7 @@ impl Ui {
 
         window.scene.add(&fps);
 
-        Ui { fps }
+        Self { fps }
     }
 
     pub fn update(&mut self, delta: f32) {

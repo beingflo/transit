@@ -1,15 +1,14 @@
 use three;
 
-
-pub struct Input {
+pub struct Control {
     quit: bool,
     toggle_fullscreen: bool,
 }
 
 
-impl Input {
+impl Control {
     pub fn new() -> Self {
-        Input { quit: false, toggle_fullscreen: false }
+        Self { quit: false, toggle_fullscreen: false }
     }
 
     pub fn handle(&mut self, input: &three::Input) {

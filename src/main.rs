@@ -1,11 +1,11 @@
 mod util;
 mod ui;
-mod input;
+mod control;
 
 use three;
 
 use ui::Ui;
-use input::Input;
+use control::Control;
 
 use three::object::Object;
 
@@ -16,7 +16,7 @@ fn main() {
     let mut window = three::Window::builder("Transit").multisampling(8).build();
     let camera = window.factory.orthographic_camera([0.0, 0.0], 1.0, -1.0 .. 1.0);
 
-    let mut input = Input::new();
+    let mut control = Control::new();
     let mut ui = Ui::new(&mut window);
 
     window.scene.background = three::Background::Color(BACKGROUND);
@@ -30,19 +30,19 @@ fn main() {
     window.scene.add(&mesh2);
 
     loop {
-        input.handle(&window.input);
+        control.handle(&window.input);
 
         let delta = window.input.delta_time();
         ui.update(delta);
 
-        if input.toggle_fullscreen() {
+        if control.toggle_fullscreen() {
             window.toggle_fullscreen();
         }
 
         window.update();
         window.render(&camera);
 
-        if input.should_quit() {
+        if control.should_quit() {
             break;
         }
     }
