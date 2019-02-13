@@ -21,7 +21,7 @@ impl Ui {
             env!("CARGO_MANIFEST_DIR")
         ));
 
-        let mut fps = window.factory.ui_text(&font, "FPS: 0.0");
+        let mut fps = window.factory.ui_text(&font, "00.00");
 
         fps.set_font_size(25.0);
         fps.set_layout(three::Layout::SingleLine(three::Align::Right));
@@ -46,7 +46,7 @@ impl Ui {
         }
 
         if self.time < INITIAL_UPDATE || self.time - self.last >= UPDATE_INTERVAL {
-            self.fps.set_text(format!("FPS: {:.2}", 1.0 / delta));
+            self.fps.set_text(format!("{:.2}", 1.0 / delta));
             self.last = self.time;
         }
 
