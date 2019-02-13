@@ -29,7 +29,7 @@ fn main() {
 
     window.scene.add(&mesh2);
 
-    loop {
+    while window.update() && !control.should_quit() {
         control.handle(&window.input);
 
         let delta = window.input.delta_time();
@@ -39,11 +39,6 @@ fn main() {
             window.toggle_fullscreen();
         }
 
-        window.update();
         window.render(&camera);
-
-        if control.should_quit() {
-            break;
-        }
     }
 }
