@@ -32,8 +32,7 @@ fn main() {
     while window.update() && !control.should_quit() {
         control.handle(&window.input);
 
-        let delta = window.input.delta_time();
-        ui.update(delta);
+        ui.update(&window);
 
         if control.toggle_fullscreen() {
             window.toggle_fullscreen();
