@@ -1,25 +1,9 @@
 use three;
-use rand::Rng;
 
 use three::object::Object;
 
 // White
 const BACKGROUND: u32 = 0xFFFFFF;
-
-struct Transporter {
-    pos: [f32; 3],
-    orientation: f32,
-}
-
-impl Transporter {
-    fn new() -> Self {
-        Transporter { pos: [0.0, 0.0, 0.0], orientation: 0.0 }
-    }
-
-    fn set_random(&mut self) {
-        self.pos = [rand::random(), rand::random(), 0.0];
-    }
-}
 
 fn main() {
     let mut window = three::Window::builder("Transit").multisampling(8).build();
@@ -68,16 +52,16 @@ fn main() {
 
     for _ in 0..100000 {
         let mesh = window.factory.mesh_instance(&mesh);
-        let mut t = Transporter::new();
-        t.set_random();
-        mesh.set_position(t.pos);
-        mesh.set_scale(0.001);
+        mesh.set_scale(0.1);
         window.scene.add(&mesh);
     }
 
     window.scene.background = three::Background::Color(BACKGROUND);
 
     while window.update() && !window.input.hit(three::KEY_ESCAPE) {
+        if window.input.keys_hit().contains(&three::controls::Key::F11) {
+            window.toggle_fullscreen();
+        }
         let delta_time = window.input.delta_time();
         fps_counter.set_text(format!("FPS: {}", 1.0 / delta_time));
         println!("{}", 1.0 / delta_time);
