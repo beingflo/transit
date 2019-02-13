@@ -21,7 +21,6 @@ fn main() {
 
     window.scene.background = three::Background::Color(BACKGROUND);
 
-
     let mesh = util::create_quad(&mut window);
     let mesh2 = window.factory.mesh_instance(&mesh);
 

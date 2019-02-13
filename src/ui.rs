@@ -12,7 +12,7 @@ impl Ui {
         let font = window.factory.load_font_karla();
         let mut fps = window.factory.ui_text(&font, "FPS: 0.0");
 
-        fps.set_font_size(20.0);
+        fps.set_font_size(25.0);
         fps.set_color(FONT_COLOR);
 
         window.scene.add(&fps);
@@ -21,6 +21,6 @@ impl Ui {
     }
 
     pub fn update(&mut self, delta: f32) {
-        self.fps.set_text(format!("FPS: {}", 1.0 / delta));
+        self.fps.set_text(format!("FPS: {:.2}", 1.0 / delta));
     }
 }
