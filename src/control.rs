@@ -1,5 +1,7 @@
 use three;
 
+const MOUSE_SENSITIVITY: f32 = 0.002;
+
 pub struct Control<'a, T: three::Object> {
     camera: &'a T,
     camera_position: [f32; 3],
@@ -13,7 +15,9 @@ pub struct Control<'a, T: three::Object> {
 
 impl<'a, T: three::Object> Control<'a, T> {
     pub fn new(object: &'a T) -> Self {
-        Self { quit: false, toggle_fullscreen: false, camera: object, camera_position: [0.0, 0.0, 0.0], mouse_pressed: false, mouse_pressed_pos: [0.0, 0.0] }
+        let camera_position = [0.0, 0.0, 1.0];
+        object.set_position(camera_position);
+        Self { quit: false, toggle_fullscreen: false, camera: object, camera_position, mouse_pressed: false, mouse_pressed_pos: [0.0, 0.0] }
     }
 
     pub fn should_quit(&self) -> bool {
@@ -48,11 +52,16 @@ impl<'a, T: three::Object> Control<'a, T> {
                 Some(size) => size.into(),
             };
 
+            let hidpi = window.glutin_window().get_hidpi_factor() as f32;
+
             let aspect_ratio = width as f32 / height as f32;
 
-            self.camera_position = [self.camera_position[0] - diff[0]*aspect_ratio, self.camera_position[1] - diff[1], self.camera_position[2]];
+            let multiplier = self.camera_position[2] / hidpi;
 
-            self.camera.set_position(self.camera_position);
+            self.camera_position = [self.camera_position[0] - diff[0]*multiplier*aspect_ratio, self.camera_position[1] - diff[1]*multiplier, self.camera_position[2]];
         }
+
+        self.camera_position[2] *= 1.0 - window.input.mouse_wheel() * MOUSE_SENSITIVITY;
+        self.camera.set_position(self.camera_position);
     }
 }
