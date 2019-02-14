@@ -3,6 +3,7 @@ mod ui;
 mod control;
 
 use three;
+use cgmath;
 
 use ui::Ui;
 use control::Control;
@@ -14,7 +15,7 @@ const BACKGROUND: u32 = 0xFFFFFF;
 
 fn main() {
     let mut window = three::Window::builder("Transit").multisampling(8).build();
-    let camera = window.factory.perspective_camera(60.0, 0.01 .. 100.0);
+    let camera = window.factory.perspective_camera(60.0, 0.01 .. );
 
     let mut control = Control::new(&camera);
     let mut ui = Ui::new(&mut window);
@@ -22,12 +23,17 @@ fn main() {
     window.scene.background = three::Background::Color(BACKGROUND);
 
     let mesh = util::create_quad(&mut window);
-    let mesh2 = window.factory.mesh_instance(&mesh);
+    mesh.set_visible(false);
 
-    mesh.set_scale(0.1);
-    mesh2.set_scale(0.1);
+    for i in -50..50 {
+        for j in -50..50 {
+            let mesh = window.factory.mesh_instance(&mesh);
+            mesh.set_scale(0.3);
+            mesh.set_position([i as f32, j as f32, 0.0]);
+            window.scene.add(&mesh);
+        }
+    }
 
-    window.scene.add(&mesh2);
 
     while window.update() && !control.should_quit() {
         control.handle(&window);
