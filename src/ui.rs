@@ -42,7 +42,6 @@ impl Ui {
         if size != self.size {
             self.fps.set_pos([size.0, 0.0]);
             self.size = size;
-        } else {
         }
 
         if self.time < INITIAL_UPDATE || self.time - self.last >= UPDATE_INTERVAL {
