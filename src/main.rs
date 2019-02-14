@@ -3,7 +3,7 @@ mod ui;
 mod control;
 
 use three;
-use cgmath;
+use cgmath::{Deg, Euler, Quaternion};
 
 use ui::Ui;
 use control::Control;
@@ -30,6 +30,8 @@ fn main() {
             let mesh = window.factory.mesh_instance(&mesh);
             mesh.set_scale(0.3);
             mesh.set_position([i as f32, j as f32, 0.0]);
+            let rot = Quaternion::<f32>::from(Euler::new(Deg(0.0), Deg(0.0), Deg((i*j % 360) as f32)));
+            mesh.set_orientation(rot);
             window.scene.add(&mesh);
         }
     }
