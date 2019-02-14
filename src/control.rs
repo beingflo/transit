@@ -44,8 +44,12 @@ impl<'a, T: three::Object> Control<'a, T> {
 
         if !window.input.hit(three::controls::MouseButton::Left) && self.mouse_pressed {
             self.mouse_pressed = false;
+        }
+
+        if self.mouse_pressed {
             let new_pos: [f32; 2] = window.input.mouse_pos_ndc().into();
             let diff = [new_pos[0] - self.mouse_pressed_pos[0], new_pos[1] - self.mouse_pressed_pos[1]];
+            self.mouse_pressed_pos = new_pos;
 
             let (width, height): (u32, u32) = match window.glutin_window().get_inner_size() {
                 None => panic!("Window doesn't exist"),
