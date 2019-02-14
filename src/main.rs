@@ -16,7 +16,7 @@ fn main() {
     let mut window = three::Window::builder("Transit").multisampling(8).build();
     let camera = window.factory.orthographic_camera([0.0, 0.0], 1.0, -1.0 .. 1.0);
 
-    let mut control = Control::new();
+    let mut control = Control::new(&camera);
     let mut ui = Ui::new(&mut window);
 
     window.scene.background = three::Background::Color(BACKGROUND);
@@ -30,7 +30,7 @@ fn main() {
     window.scene.add(&mesh2);
 
     while window.update() && !control.should_quit() {
-        control.handle(&window.input);
+        control.handle(&window);
 
         ui.update(&window);
 
