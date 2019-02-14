@@ -1,11 +1,11 @@
 use three;
 
-pub fn create_quad(window: &mut three::Window) -> three::Mesh {
+pub fn create_quad(window: &mut three::Window, scale: [f32; 2]) -> three::Mesh {
     let vertices = vec![
-        [-0.5, -1.0, 0.0].into(),
-        [0.5, -1.0, 0.0].into(),
-        [0.5, 1.0, 0.0].into(),
-        [-0.5, 1.0, 0.0].into(),
+        [-1.0, -1.0, 0.0].into(),
+        [1.0, -1.0, 0.0].into(),
+        [1.0, 1.0, 0.0].into(),
+        [-1.0, 1.0, 0.0].into(),
     ];
 
     let faces = vec![
@@ -13,7 +13,7 @@ pub fn create_quad(window: &mut three::Window) -> three::Mesh {
         [2, 3, 0],
     ];
 
-    let quad = three::Geometry {
+    let mut quad = three::Geometry {
         faces,
         base: three::Shape {
             vertices,
@@ -21,6 +21,11 @@ pub fn create_quad(window: &mut three::Window) -> three::Mesh {
         },
         .. three::Geometry::default()
     };
+
+    for v in quad.base.vertices.iter_mut() {
+        v.x *= scale[0];
+        v.y *= scale[1];
+    }
 
     let material = three::material::Basic {
         color: 0x000000,

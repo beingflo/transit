@@ -22,7 +22,7 @@ fn main() {
 
     window.scene.background = three::Background::Color(BACKGROUND);
 
-    let mesh = util::create_quad(&mut window);
+    let mesh = util::create_quad(&mut window, [0.5, 1.0]);
     mesh.set_visible(false);
 
     for i in -50..50 {
