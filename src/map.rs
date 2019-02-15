@@ -10,6 +10,7 @@ use crate::util;
 const GRID_SIZE: i32 = 5;
 const BLOCK_SIZE: f32 = 0.45;
 const CAR_SIZE: f32 = 0.03;
+const STEPS_PER_ROAD: u32 = 240;
 
 pub struct Map {
     buildings: Vec<Building>,
@@ -53,12 +54,9 @@ impl Map {
         let transporter = window.factory.mesh_instance(&transporter_template);
 
         transporter.set_scale(CAR_SIZE);
-        let pos = [- 0.475, 0.0];
-        transporter.set_position([pos[0], pos[1], 0.0]);
-
         window.scene.add(&transporter);
 
-        transporters.push(Transporter::new(transporter, pos));
+        transporters.push(Transporter::new(transporter, (0,0,Dir::Left)));
 
 
         Self { buildings, roads, transporters }
@@ -71,7 +69,7 @@ impl Map {
     }
 }
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Copy, Clone)]
 enum Dir {
     Left,
     Down,
@@ -98,15 +96,29 @@ struct Transporter {
     src: [i32; 2],
     target: [i32; 2],
 
+    road: (i32, i32, Dir),
+    steps: u32,
+
     cargo: Option<Item>,
 }
 
 impl Transporter {
-    fn new(mesh: three::Mesh, pos: [f32; 2]) -> Self {
-        Self { mesh, pos, src: [0, 0], target: [0,0], cargo: None }
+    fn new(mesh: three::Mesh, road: (i32, i32, Dir)) -> Self {
+        let pos = road_to_spatial(road, 0).0;
+        Self { mesh, pos, src: [0, 0], target: [0,0], road, steps: 0, cargo: None }
     }
 
     fn update(&mut self) {
+        self.steps += 1;
+
+        if self.steps >= STEPS_PER_ROAD {
+            self.road.1 += 1;
+            self.steps = 0;
+        }
+
+        let (pos, rot) = road_to_spatial(self.road, self.steps);
+        self.mesh.set_position([pos[0], pos[1], 0.0]);
+        self.mesh.set_orientation(rot);
     }
 }
 
@@ -119,4 +131,39 @@ impl Item {
     fn new(value: u32) -> Self {
         Self { value }
     }
+}
+
+fn road_to_spatial(road: (i32, i32, Dir), steps: u32) -> ([f32; 2], Quaternion<f32>) {
+    let mut pos = [road.0 as f32, road.1 as f32];
+
+    let deg = match road.2 {
+        Dir::Left => {
+            pos[0] -= 0.475;
+            pos[1] += steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * BLOCK_SIZE - BLOCK_SIZE;
+
+            0.0
+        },
+        Dir::Down => {
+            pos[0] -= steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * BLOCK_SIZE - BLOCK_SIZE;
+            pos[1] -= 0.475;
+
+            270.0
+        },
+        Dir::Right => {
+            pos[0] += 0.475;
+            pos[1] -= steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * BLOCK_SIZE - BLOCK_SIZE;
+
+            180.0
+        },
+        Dir::Up => {
+            pos[0] += steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * BLOCK_SIZE - BLOCK_SIZE;
+            pos[1] += 0.475;
+
+            90.0
+        },
+    };
+
+    let rot = Quaternion::<f32>::from(Euler::new(Deg(0.0), Deg(0.0), Deg(deg)));
+
+    (pos, rot)
 }
