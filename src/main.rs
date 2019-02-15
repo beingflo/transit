@@ -1,12 +1,13 @@
 mod util;
 mod ui;
 mod control;
+mod map;
 
 use three;
-use cgmath::{Deg, Euler, Quaternion};
 
 use ui::Ui;
 use control::Control;
+use map::Map;
 
 use three::object::Object;
 
@@ -22,20 +23,7 @@ fn main() {
 
     window.scene.background = three::Background::Color(BACKGROUND);
 
-    let mesh = util::create_quad(&mut window, [0.5, 1.0]);
-    mesh.set_visible(false);
-
-    for i in -50..50 {
-        for j in -50..50 {
-            let mesh = window.factory.mesh_instance(&mesh);
-            mesh.set_scale(0.3);
-            mesh.set_position([i as f32, j as f32, 0.0]);
-            let rot = Quaternion::<f32>::from(Euler::new(Deg(0.0), Deg(0.0), Deg((i*j % 360) as f32)));
-            mesh.set_orientation(rot);
-            window.scene.add(&mesh);
-        }
-    }
-
+    let map = Map::new(&mut window);
 
     while window.update() && !control.should_quit() {
         control.handle(&window);
