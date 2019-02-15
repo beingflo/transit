@@ -50,22 +50,34 @@ impl Map {
 
 struct Building {
     pos: [i32; 2],
-    wares: (),
+    wares: Vec<Item>,
 }
 
 impl Building {
     fn new(pos: [i32; 2]) -> Self {
-        Self { pos, wares: () }
+        Self { pos, wares: Vec::new() }
     }
 }
 
 struct Transporter {
     pos: [f32; 2],
-    cargo: (),
+    src: [i32; 2],
+    target: [i32; 2],
+    cargo: Option<Item>,
 }
 
 impl Transporter {
     fn new(pos: [f32; 2]) -> Self {
-        Self { pos, cargo: () }
+        Self { pos, src: [0, 0], target: [0,0], cargo: None }
+    }
+}
+
+struct Item {
+    value: u32,
+}
+
+impl Item {
+    fn new(v: u32) -> Self {
+        Self { value: v }
     }
 }
