@@ -15,7 +15,7 @@ pub struct Control<'a, T: three::Object> {
 
 impl<'a, T: three::Object> Control<'a, T> {
     pub fn new(object: &'a T) -> Self {
-        let camera_position = [0.0, 0.0, 1.0];
+        let camera_position = [0.0, 0.0, 0.5];
         object.set_position(camera_position);
         Self { quit: false, toggle_fullscreen: false, camera: object, camera_position, mouse_pressed: false, mouse_pressed_pos: [0.0, 0.0] }
     }
