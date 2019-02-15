@@ -5,8 +5,11 @@ use cgmath::{Deg, Euler, Quaternion};
 
 use crate::util;
 
+const GRID_SIZE: i32 = 5;
+
 pub struct Map {
     buildings: Vec<Building>,
+    roads: Vec<Road>,
     transporters: Vec<Transporter>,
 }
 
@@ -16,10 +19,11 @@ impl Map {
         let transporter_template = util::create_quad(window, [0.5, 1.0]);
 
         let mut buildings = Vec::new();
+        let mut roads = Vec::new();
         let mut transporters = Vec::new();
 
-        for i in -10..10 {
-            for j in -10..10 {
+        for i in -GRID_SIZE .. GRID_SIZE {
+            for j in -GRID_SIZE .. GRID_SIZE {
                 let building = window.factory.mesh_instance(&building_template);
                 building.set_scale(0.45);
                 building.set_position([i as f32, j as f32, 0.0]);
@@ -30,8 +34,8 @@ impl Map {
             }
         }
 
-        for i in -10..10 {
-            for j in -10..10 {
+        for i in -GRID_SIZE .. GRID_SIZE {
+            for j in -GRID_SIZE .. GRID_SIZE {
                 let transporter = window.factory.mesh_instance(&transporter_template);
 
                 transporter.set_scale(0.02);
@@ -71,7 +75,7 @@ impl Map {
             }
         }
 
-        Self { buildings, transporters }
+        Self { buildings, roads, transporters }
     }
 
     pub fn update(&mut self) {
@@ -89,6 +93,19 @@ struct Building {
 impl Building {
     fn new(pos: [i32; 2]) -> Self {
         Self { pos, wares: Vec::new() }
+    }
+}
+
+struct Road {
+    begin: [f32; 2],
+    end: [f32; 2],
+
+    load: u32,
+}
+
+impl Road {
+    fn new(begin: [f32; 2], end: [f32; 2]) -> Self {
+        Self { begin, end, load: 0 }
     }
 }
 
