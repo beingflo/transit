@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use three;
 use three::object::Object;
 
@@ -9,7 +11,7 @@ const GRID_SIZE: i32 = 5;
 
 pub struct Map {
     buildings: Vec<Building>,
-    roads: Vec<Road>,
+    roads: HashMap<(i32, i32, Dir), Road>,
     transporters: Vec<Transporter>,
 }
 
@@ -18,10 +20,9 @@ impl Map {
         let building_template = util::create_quad(window, [1.0, 1.0]);
         let transporter_template = util::create_quad(window, [0.5, 1.0]);
 
-        let mut buildings = Vec::new();
-        let mut roads = Vec::new();
-        let mut transporters = Vec::new();
 
+        // Set up buildings
+        let mut buildings = Vec::new();
         for i in -GRID_SIZE .. GRID_SIZE {
             for j in -GRID_SIZE .. GRID_SIZE {
                 let building = window.factory.mesh_instance(&building_template);
@@ -34,12 +35,25 @@ impl Map {
             }
         }
 
+        // Set up Roads
+        let mut roads = HashMap::new();
+        for i in -GRID_SIZE .. GRID_SIZE {
+            for j in -GRID_SIZE .. GRID_SIZE {
+                roads.insert((i,j, Dir::Left), Road::new());
+                roads.insert((i,j, Dir::Down), Road::new());
+                roads.insert((i,j, Dir::Right), Road::new());
+                roads.insert((i,j, Dir::Up), Road::new());
+            }
+        }
+
+        // Set up Transporters
+        let mut transporters = Vec::new();
         for i in -GRID_SIZE .. GRID_SIZE {
             for j in -GRID_SIZE .. GRID_SIZE {
                 let transporter = window.factory.mesh_instance(&transporter_template);
 
-                transporter.set_scale(0.02);
-                let pos = [i as f32 - 0.462, j as f32 - 0.0];
+                transporter.set_scale(0.03);
+                let pos = [i as f32 - 0.475, j as f32 - 0.0];
                 transporter.set_position([pos[0], pos[1], 0.0]);
 
                 window.scene.add(&transporter);
@@ -47,26 +61,8 @@ impl Map {
                 transporters.push(Transporter::new(transporter, pos));
                 let transporter = window.factory.mesh_instance(&transporter_template);
 
-                transporter.set_scale(0.02);
-                let pos = [i as f32 - 0.486, j as f32 - 0.0];
-                transporter.set_position([pos[0], pos[1], 0.0]);
-
-                window.scene.add(&transporter);
-
-                transporters.push(Transporter::new(transporter, pos));
-                let transporter = window.factory.mesh_instance(&transporter_template);
-
-                transporter.set_scale(0.02);
-                let pos = [i as f32 - 0.514, j as f32 - 0.0];
-                transporter.set_position([pos[0], pos[1], 0.0]);
-
-                window.scene.add(&transporter);
-
-                transporters.push(Transporter::new(transporter, pos));
-                let transporter = window.factory.mesh_instance(&transporter_template);
-
-                transporter.set_scale(0.02);
-                let pos = [i as f32 - 0.538, j as f32 - 0.0];
+                transporter.set_scale(0.03);
+                let pos = [i as f32 - 0.525, j as f32 - 0.0];
                 transporter.set_position([pos[0], pos[1], 0.0]);
 
                 window.scene.add(&transporter);
@@ -85,6 +81,14 @@ impl Map {
     }
 }
 
+#[derive(PartialEq, Eq, Hash)]
+enum Dir {
+    Left,
+    Down,
+    Right,
+    Up,
+}
+
 struct Building {
     pos: [i32; 2],
     wares: Vec<Item>,
@@ -96,16 +100,18 @@ impl Building {
     }
 }
 
+type RoadId = u32;
+
+#[derive(Clone, Debug)]
 struct Road {
-    begin: [f32; 2],
-    end: [f32; 2],
+    interchange: [RoadId; 4],
 
     load: u32,
 }
 
 impl Road {
-    fn new(begin: [f32; 2], end: [f32; 2]) -> Self {
-        Self { begin, end, load: 0 }
+    fn new() -> Self {
+        Self { interchange: [0; 4], load: 0 }
     }
 }
 
@@ -126,6 +132,7 @@ impl Transporter {
     }
 }
 
+#[derive(Clone, Debug)]
 struct Item {
     value: u32,
 }
