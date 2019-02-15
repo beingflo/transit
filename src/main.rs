@@ -23,10 +23,11 @@ fn main() {
 
     window.scene.background = three::Background::Color(BACKGROUND);
 
-    let map = Map::new(&mut window);
+    let mut map = Map::new(&mut window);
 
     while window.update() && !control.should_quit() {
         control.handle(&window);
+        map.update();
 
         ui.update(&window);
 

@@ -38,13 +38,19 @@ impl Map {
                 let pos = [i as f32 - 0.45, j as f32 - 0.35];
                 transporter.set_position([pos[0], pos[1], 0.0]);
 
-                transporters.push(Transporter::new(pos));
-
                 window.scene.add(&transporter);
+
+                transporters.push(Transporter::new(transporter, pos));
             }
         }
 
         Self { buildings, transporters }
+    }
+
+    pub fn update(&mut self) {
+        for t in self.transporters.iter_mut() {
+            t.update();
+        }
     }
 }
 
@@ -60,6 +66,7 @@ impl Building {
 }
 
 struct Transporter {
+    mesh: three::Mesh,
     pos: [f32; 2],
     src: [i32; 2],
     target: [i32; 2],
@@ -67,8 +74,11 @@ struct Transporter {
 }
 
 impl Transporter {
-    fn new(pos: [f32; 2]) -> Self {
-        Self { pos, src: [0, 0], target: [0,0], cargo: None }
+    fn new(mesh: three::Mesh, pos: [f32; 2]) -> Self {
+        Self { mesh, pos, src: [0, 0], target: [0,0], cargo: None }
+    }
+
+    fn update(&mut self) {
     }
 }
 
@@ -77,7 +87,7 @@ struct Item {
 }
 
 impl Item {
-    fn new(v: u32) -> Self {
-        Self { value: v }
+    fn new(value: u32) -> Self {
+        Self { value }
     }
 }
