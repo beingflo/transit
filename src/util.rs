@@ -27,9 +27,8 @@ pub fn create_quad(window: &mut three::Window, scale: [f32; 2]) -> three::Mesh {
         v.y *= scale[1];
     }
 
-    let material = three::material::Basic {
+    let material = three::material::Line {
         color: 0x000000,
-        map: None,
     };
 
     let mesh = window.factory.mesh(quad, material);
