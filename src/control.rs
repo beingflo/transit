@@ -56,11 +56,9 @@ impl<'a, T: three::Object> Control<'a, T> {
                 Some(size) => size.into(),
             };
 
-            let hidpi = window.glutin_window().get_hidpi_factor() as f32;
-
             let aspect_ratio = width as f32 / height as f32;
 
-            let multiplier = self.camera_position[2] / hidpi;
+            let multiplier = self.camera_position[2];
 
             self.camera_position = [self.camera_position[0] - diff[0]*multiplier*aspect_ratio, self.camera_position[1] - diff[1]*multiplier, self.camera_position[2]];
         }
