@@ -98,6 +98,7 @@ struct Transporter {
     target: [i32; 2],
 
     road: Road,
+    next_road: Option<Road>,
     steps: u32,
 
     cargo: Option<Item>,
@@ -105,7 +106,7 @@ struct Transporter {
 
 impl Transporter {
     fn new(mesh: three::Mesh, road: Road) -> Self {
-        Self { mesh, src: [0, 0], target: [0,0], road, steps: 0, cargo: None }
+        Self { mesh, src: [0, 0], target: [0,0], road, next_road: None, steps: 0, cargo: None }
     }
 
     fn update(&mut self, roads: &mut HashMap<Road, u32>) {
