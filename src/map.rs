@@ -12,9 +12,11 @@ const BLOCK_SIZE: f32 = 0.45;
 const CAR_SIZE: f32 = 0.03;
 const STEPS_PER_ROAD: u32 = 240;
 
+type Road = (i32, i32, Dir);
+
 pub struct Map {
     buildings: Vec<Building>,
-    roads: HashMap<(i32, i32, Dir), u32>,
+    roads: HashMap<Road, u32>,
     transporters: Vec<Transporter>,
 }
 
@@ -56,7 +58,7 @@ impl Map {
         transporter.set_scale(CAR_SIZE);
         window.scene.add(&transporter);
 
-        transporters.push(Transporter::new(transporter, (0,0,Dir::Left)));
+        transporters.push(Transporter::new(transporter, (0,0,Dir::Right)));
 
 
         Self { buildings, roads, transporters }
@@ -64,7 +66,7 @@ impl Map {
 
     pub fn update(&mut self) {
         for t in self.transporters.iter_mut() {
-            t.update();
+            t.update(&mut self.roads);
         }
     }
 }
@@ -96,19 +98,19 @@ struct Transporter {
     src: [i32; 2],
     target: [i32; 2],
 
-    road: (i32, i32, Dir),
+    road: Road,
     steps: u32,
 
     cargo: Option<Item>,
 }
 
 impl Transporter {
-    fn new(mesh: three::Mesh, road: (i32, i32, Dir)) -> Self {
+    fn new(mesh: three::Mesh, road: Road) -> Self {
         let pos = road_to_spatial(road, 0).0;
         Self { mesh, pos, src: [0, 0], target: [0,0], road, steps: 0, cargo: None }
     }
 
-    fn update(&mut self) {
+    fn update(&mut self, roads: &mut HashMap<Road, u32>) {
         self.steps += 1;
 
         if self.steps >= STEPS_PER_ROAD {
