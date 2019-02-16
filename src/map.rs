@@ -10,7 +10,7 @@ use crate::util;
 const GRID_SIZE: i32 = 5;
 const BLOCK_SIZE: f32 = 0.45;
 const CAR_SIZE: f32 = 0.03;
-const STEPS_PER_ROAD: u32 = 240;
+const STEPS_PER_ROAD: u32 = 480;
 
 type Road = (i32, i32, Dir);
 
@@ -93,8 +93,6 @@ impl Building {
 struct Transporter {
     mesh: three::Mesh,
 
-    pos: [f32; 2],
-
     src: [i32; 2],
     target: [i32; 2],
 
@@ -106,8 +104,7 @@ struct Transporter {
 
 impl Transporter {
     fn new(mesh: three::Mesh, road: Road) -> Self {
-        let pos = road_to_spatial(road, 0).0;
-        Self { mesh, pos, src: [0, 0], target: [0,0], road, steps: 0, cargo: None }
+        Self { mesh, src: [0, 0], target: [0,0], road, steps: 0, cargo: None }
     }
 
     fn update(&mut self, roads: &mut HashMap<Road, u32>) {
@@ -138,28 +135,33 @@ impl Item {
 fn road_to_spatial(road: (i32, i32, Dir), steps: u32) -> ([f32; 2], Quaternion<f32>) {
     let mut pos = [road.0 as f32, road.1 as f32];
 
+    let drivable_block_size = BLOCK_SIZE - CAR_SIZE;
+
+    let progress = steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * drivable_block_size - drivable_block_size;
+    let offset = 0.475;
+
     let deg = match road.2 {
         Dir::Left => {
-            pos[0] -= 0.475;
-            pos[1] += steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * BLOCK_SIZE - BLOCK_SIZE;
+            pos[0] -= offset;
+            pos[1] += progress;
 
             0.0
         },
         Dir::Down => {
-            pos[0] -= steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * BLOCK_SIZE - BLOCK_SIZE;
-            pos[1] -= 0.475;
+            pos[0] -= progress;
+            pos[1] -= offset;
 
             270.0
         },
         Dir::Right => {
-            pos[0] += 0.475;
-            pos[1] -= steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * BLOCK_SIZE - BLOCK_SIZE;
+            pos[0] += offset;
+            pos[1] -= progress;
 
             180.0
         },
         Dir::Up => {
-            pos[0] += steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * BLOCK_SIZE - BLOCK_SIZE;
-            pos[1] += 0.475;
+            pos[0] += progress;
+            pos[1] += offset;
 
             90.0
         },
