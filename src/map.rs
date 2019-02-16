@@ -10,7 +10,7 @@ use crate::util;
 const GRID_SIZE: i32 = 5;
 const BLOCK_SIZE: f32 = 0.45;
 const CAR_SIZE: f32 = 0.03;
-const STEPS_PER_ROAD: u32 = 480;
+const STEPS_PER_ROAD: u32 = 240;
 
 type Road = (i32, i32, Dir);
 
@@ -58,8 +58,9 @@ impl Map {
         transporter.set_scale(CAR_SIZE);
         window.scene.add(&transporter);
 
-        transporters.push(Transporter::new(transporter, (0,0,Dir::Right)));
-
+        let road = (0,0,Dir::Right);
+        *roads.get_mut(&road).unwrap() += 1;
+        transporters.push(Transporter::new(transporter, road));
 
         Self { buildings, roads, transporters }
     }
@@ -111,7 +112,17 @@ impl Transporter {
         self.steps += 1;
 
         if self.steps >= STEPS_PER_ROAD {
-            self.road.1 += 1;
+            *roads.get_mut(&self.road).unwrap() -= 1;
+
+            match self.road.2 {
+                Dir::Up => self.road.2 = Dir::Right,
+                Dir::Down => self.road.2 = Dir::Left,
+                Dir::Right => self.road.2 = Dir::Down,
+                Dir::Left => self.road.2 = Dir::Up,
+            }
+
+            *roads.get_mut(&self.road).unwrap() += 1;
+
             self.steps = 0;
         }
 
