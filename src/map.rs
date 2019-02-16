@@ -25,9 +25,7 @@ pub struct Map {
 impl Map {
     pub fn new(window: &mut three::Window) -> Self {
         let quad = three::Geometry::cuboid(1.5, 1.5, 0.3);
-        let material = three::material::Line {
-            color: 0x000000,
-        };
+        let material = three::material::Line { color: 0x000000 };
 
         let building_template = window.factory.mesh(quad, material.clone());
 
@@ -63,7 +61,7 @@ impl Map {
 
         // Set up Transporters
         let mut transporters = Vec::new();
-        for _ in 0..2000 {
+        for _ in 0..5000 {
             let transporter = window.factory.mesh_instance(&transporter_template);
 
             transporter.set_scale(CAR_SIZE);

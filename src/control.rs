@@ -17,6 +17,9 @@ impl<'a, T: three::Object> Control<'a, T> {
     pub fn new(object: &'a T) -> Self {
         let camera_position = [0.0, 0.0, 0.5];
         object.set_position(camera_position);
+
+        object.look_at([0.0, 0.0, 0.0],[0.0, 0.0, -1.0],None);
+
         Self { quit: false, toggle_fullscreen: false, camera: object, camera_position, mouse_pressed: false, mouse_pressed_pos: [0.0, 0.0] }
     }
 
@@ -63,6 +66,7 @@ impl<'a, T: three::Object> Control<'a, T> {
             self.camera_position = [self.camera_position[0] - diff[0]*multiplier*aspect_ratio, self.camera_position[1] - diff[1]*multiplier, self.camera_position[2]];
         }
 
+        self.camera.look_at([0.0, 0.0, 0.0],[0.0, 1.0/self.camera_position[2], -1.0],None);
         self.camera_position[2] *= 1.0 - window.input.mouse_wheel() * MOUSE_SENSITIVITY;
         self.camera.set_position(self.camera_position);
     }

@@ -17,7 +17,6 @@ const BACKGROUND: u32 = 0xFFFFFF;
 fn main() {
     let mut window = three::Window::builder("Transit").multisampling(8).build();
     let camera = window.factory.perspective_camera(90.0, 0.01 .. );
-    camera.look_at([0.0, 0.0, 0.0],[0.0, 0.5, -1.0],None);
 
     let mut control = Control::new(&camera);
     let mut ui = Ui::new(&mut window);
