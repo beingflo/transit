@@ -9,7 +9,7 @@ use cgmath::{Deg, Euler, Quaternion};
 
 use crate::util;
 
-const GRID_SIZE: i32 = 5;
+const GRID_SIZE: i32 = 50;
 const BLOCK_SIZE: f32 = 0.45;
 const CAR_SIZE: f32 = 0.03;
 const STEPS_PER_ROAD: u32 = 240;
@@ -24,8 +24,16 @@ pub struct Map {
 
 impl Map {
     pub fn new(window: &mut three::Window) -> Self {
-        let building_template = util::create_quad(window, [1.0, 1.0]);
-        let transporter_template = util::create_quad(window, [0.5, 1.0]);
+        let quad = three::Geometry::cuboid(1.5, 1.5, 0.3);
+        let material = three::material::Line {
+            color: 0x000000,
+        };
+
+        let building_template = window.factory.mesh(quad, material.clone());
+
+        let quad = three::Geometry::cuboid(1.0, 2.0, 0.5);
+
+        let transporter_template = window.factory.mesh(quad, material);
 
 
         // Set up buildings
@@ -55,14 +63,14 @@ impl Map {
 
         // Set up Transporters
         let mut transporters = Vec::new();
-        for _ in 0..20 {
+        for _ in 0..2000 {
             let transporter = window.factory.mesh_instance(&transporter_template);
 
             transporter.set_scale(CAR_SIZE);
             window.scene.add(&transporter);
 
-            let i = (rand::random::<u32>() % (GRID_SIZE as u32 * 2)) as i32 - GRID_SIZE;
-            let j = (rand::random::<u32>() % (GRID_SIZE as u32 * 2)) as i32 - GRID_SIZE;
+            let i = (rand::random::<u32>() % ((GRID_SIZE-2) as u32 * 2)) as i32 - GRID_SIZE+1;
+            let j = (rand::random::<u32>() % ((GRID_SIZE-2) as u32 * 2)) as i32 - GRID_SIZE+1;
 
             let road = (i, j, Dir::Right);
             *roads.get_mut(&road).unwrap() += 1;
@@ -156,7 +164,7 @@ impl Transporter {
             match self.road.2 {
                 Dir::Left => {
                     if self.target[0] < self.road.0 {
-                        return Some((self.road.0 - 1, self.road.1, Dir::Up));
+                        return Some((self.road.0 - 1, self.road.1 + 1, Dir::Down));
                     }
                     if self.target[0] > self.road.0 {
                         return Some((self.road.0, self.road.1, Dir::Up));
@@ -183,7 +191,7 @@ impl Transporter {
                         return Some((self.road.0, self.road.1, Dir::Right));
                     }
                     if self.target[0] == self.road.0 && self.target[1] > self.road.1 {
-                        return Some((self.road.0, self.road.1 + 1, Dir::Right));
+                        return Some((self.road.0 + 1, self.road.1 + 1, Dir::Left));
                     }
 
                     if self.target[0] == self.road.0 && self.target[1] == self.road.1 {
