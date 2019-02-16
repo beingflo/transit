@@ -35,3 +35,42 @@ pub fn create_quad(window: &mut three::Window, scale: [f32; 2]) -> three::Mesh {
 
     mesh
 }
+
+pub fn create_circle(window: &mut three::Window, segments: u32) -> three::Mesh {
+    let segment_angle = 2.0 * std::f32::consts::PI / segments as f32;
+
+    let mut vertices = Vec::new();
+
+    let mut cur_angle: f32 = 0.0;
+
+    vertices.push([0.0, 0.0, 0.0].into());
+    for _ in 0..segments {
+        vertices.push([cur_angle.sin(), cur_angle.cos(), 0.0].into());
+
+        cur_angle += segment_angle;
+    }
+
+    let mut faces = Vec::new();
+
+    for i in 0..segments+1 {
+        faces.push([0, (i+2) % segments+1, (i+1) % segments+1]);
+    }
+
+    let circle = three::Geometry {
+        faces,
+        base: three::Shape {
+            vertices,
+            .. three::Shape::default()
+        },
+        .. three::Geometry::default()
+    };
+
+    let material = three::material::Basic {
+        color: 0x000000,
+        map: None,
+    };
+
+    let mesh = window.factory.mesh(circle, material);
+
+    mesh
+}

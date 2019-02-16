@@ -9,8 +9,6 @@ use ui::Ui;
 use control::Control;
 use map::Map;
 
-use three::object::Object;
-
 // White
 const BACKGROUND: u32 = 0xFFFFFF;
 
