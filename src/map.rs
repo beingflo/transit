@@ -7,8 +7,6 @@ use three::object::Object;
 
 use cgmath::{Deg, Euler, Quaternion};
 
-use crate::util;
-
 const GRID_SIZE: i32 = 50;
 const BLOCK_SIZE: f32 = 0.45;
 const CAR_SIZE: f32 = 0.03;
