@@ -152,13 +152,13 @@ impl Transporter {
                     if self.target[0] < self.road.0 && self.target[1] < self.road.1 {
                         next_road = (self.road.0 - 1, self.road.1, Dir::Up);
                     }
-                    if self.target[0] < self.road.0 && self.target[1] > self.road.1 {
+                    if self.target[0] < self.road.0 && self.target[1] >= self.road.1 {
                         next_road = (self.road.0 - 1, self.road.1, Dir::Up);
                     }
-                    if self.target[0] > self.road.0 && self.target[1] < self.road.1 {
+                    if self.target[0] >= self.road.0 && self.target[1] < self.road.1 {
                         next_road = (self.road.0, self.road.1, Dir::Up);
                     }
-                    if self.target[0] > self.road.0 && self.target[1] > self.road.1 {
+                    if self.target[0] >= self.road.0 && self.target[1] >= self.road.1 {
                         next_road = (self.road.0, self.road.1, Dir::Up);
                     }
                 },
@@ -166,13 +166,13 @@ impl Transporter {
                     if self.target[0] < self.road.0 && self.target[1] < self.road.1 {
                         next_road = (self.road.0, self.road.1, Dir::Right);
                     }
-                    if self.target[0] < self.road.0 && self.target[1] > self.road.1 {
+                    if self.target[0] < self.road.0 && self.target[1] >= self.road.1 {
                         next_road = (self.road.0 + 1, self.road.1 + 1, Dir::Left);
                     }
-                    if self.target[0] > self.road.0 && self.target[1] < self.road.1 {
+                    if self.target[0] >= self.road.0 && self.target[1] < self.road.1 {
                         next_road = (self.road.0, self.road.1, Dir::Right);
                     }
-                    if self.target[0] > self.road.0 && self.target[1] > self.road.1 {
+                    if self.target[0] >= self.road.0 && self.target[1] >= self.road.1 {
                         next_road = (self.road.0 + 1, self.road.1 + 1, Dir::Left);
                     }
                 },
@@ -180,13 +180,13 @@ impl Transporter {
                     if self.target[0] < self.road.0 && self.target[1] < self.road.1 {
                         next_road = (self.road.0, self.road.1, Dir::Down);
                     }
-                    if self.target[0] < self.road.0 && self.target[1] > self.road.1 {
+                    if self.target[0] < self.road.0 && self.target[1] >= self.road.1 {
                         next_road = (self.road.0, self.road.1, Dir::Left);
                     }
-                    if self.target[0] > self.road.0 && self.target[1] < self.road.1 {
+                    if self.target[0] >= self.road.0 && self.target[1] < self.road.1 {
                         next_road = (self.road.0 + 1, self.road.1 - 1, Dir::Up);
                     }
-                    if self.target[0] > self.road.0 && self.target[1] > self.road.1 {
+                    if self.target[0] >= self.road.0 && self.target[1] >= self.road.1 {
                         next_road = (self.road.0 + 1, self.road.1 - 1, Dir::Up);
                     }
                 },
@@ -194,13 +194,13 @@ impl Transporter {
                     if self.target[0] < self.road.0 && self.target[1] < self.road.1 {
                         next_road = (self.road.0 - 1, self.road.1, Dir::Down);
                     }
-                    if self.target[0] < self.road.0 && self.target[1] > self.road.1 {
+                    if self.target[0] < self.road.0 && self.target[1] >= self.road.1 {
                         next_road = (self.road.0 - 1, self.road.1, Dir::Down);
                     }
-                    if self.target[0] > self.road.0 && self.target[1] < self.road.1 {
+                    if self.target[0] >= self.road.0 && self.target[1] < self.road.1 {
                         next_road = (self.road.0 - 1, self.road.1 - 1, Dir::Right);
                     }
-                    if self.target[0] > self.road.0 && self.target[1] > self.road.1 {
+                    if self.target[0] >= self.road.0 && self.target[1] >= self.road.1 {
                         next_road = (self.road.0, self.road.1, Dir::Left);
                     }
                 },
