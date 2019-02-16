@@ -58,7 +58,7 @@ impl Map {
         transporter.set_scale(CAR_SIZE);
         window.scene.add(&transporter);
 
-        let road = (0,0,Dir::Right);
+        let road = (1,2,Dir::Right);
         *roads.get_mut(&road).unwrap() += 1;
         transporters.push(Transporter::new(transporter, road));
 
@@ -106,7 +106,11 @@ struct Transporter {
 
 impl Transporter {
     fn new(mesh: three::Mesh, road: Road) -> Self {
-        Self { mesh, src: [0, 0], target: [0,0], road, next_road: None, steps: 0, cargo: None }
+        Self { mesh, src: [road.0, road.1], target: [0,0], road, next_road: None, steps: 0, cargo: None }
+    }
+
+    fn set_target(&mut self, target: [i32; 2]) {
+        self.target = target;
     }
 
     fn update(&mut self, roads: &mut HashMap<Road, u32>) {
@@ -115,11 +119,14 @@ impl Transporter {
         if self.steps >= STEPS_PER_ROAD {
             *roads.get_mut(&self.road).unwrap() -= 1;
 
-            match self.road.2 {
-                Dir::Up => self.road.2 = Dir::Right,
-                Dir::Down => self.road.2 = Dir::Left,
-                Dir::Right => self.road.2 = Dir::Down,
-                Dir::Left => self.road.2 = Dir::Up,
+            match self.next_road() {
+                Some(road) => {
+                    self.road = road;
+                },
+                None => {
+                    self.next_road = None;
+                    return;
+                }
             }
 
             *roads.get_mut(&self.road).unwrap() += 1;
@@ -127,9 +134,79 @@ impl Transporter {
             self.steps = 0;
         }
 
+        // Drawing
         let (pos, rot) = road_to_spatial(self.road, self.steps);
         self.mesh.set_position([pos[0], pos[1], 0.0]);
         self.mesh.set_orientation(rot);
+    }
+
+    fn next_road(&self) -> Option<Road> {
+        if self.road.0 == self.target[0] && self.road.1 == self.target[1] {
+            // Arrived at destination
+            return None;
+        } else {
+            // Continue
+            let mut next_road = (0, 0, Dir::Left);
+            match self.road.2 {
+                Dir::Left => {
+                    if self.target[0] < self.road.0 && self.target[1] < self.road.1 {
+                        next_road = (self.road.0 - 1, self.road.1, Dir::Up);
+                    }
+                    if self.target[0] < self.road.0 && self.target[1] > self.road.1 {
+                        next_road = (self.road.0 - 1, self.road.1, Dir::Up);
+                    }
+                    if self.target[0] > self.road.0 && self.target[1] < self.road.1 {
+                        next_road = (self.road.0, self.road.1, Dir::Up);
+                    }
+                    if self.target[0] > self.road.0 && self.target[1] > self.road.1 {
+                        next_road = (self.road.0, self.road.1, Dir::Up);
+                    }
+                },
+                Dir::Up => {
+                    if self.target[0] < self.road.0 && self.target[1] < self.road.1 {
+                        next_road = (self.road.0, self.road.1, Dir::Right);
+                    }
+                    if self.target[0] < self.road.0 && self.target[1] > self.road.1 {
+                        next_road = (self.road.0 + 1, self.road.1 + 1, Dir::Left);
+                    }
+                    if self.target[0] > self.road.0 && self.target[1] < self.road.1 {
+                        next_road = (self.road.0, self.road.1, Dir::Right);
+                    }
+                    if self.target[0] > self.road.0 && self.target[1] > self.road.1 {
+                        next_road = (self.road.0 + 1, self.road.1 + 1, Dir::Left);
+                    }
+                },
+                Dir::Right => {
+                    if self.target[0] < self.road.0 && self.target[1] < self.road.1 {
+                        next_road = (self.road.0, self.road.1, Dir::Down);
+                    }
+                    if self.target[0] < self.road.0 && self.target[1] > self.road.1 {
+                        next_road = (self.road.0, self.road.1, Dir::Left);
+                    }
+                    if self.target[0] > self.road.0 && self.target[1] < self.road.1 {
+                        next_road = (self.road.0 + 1, self.road.1 - 1, Dir::Up);
+                    }
+                    if self.target[0] > self.road.0 && self.target[1] > self.road.1 {
+                        next_road = (self.road.0 + 1, self.road.1 - 1, Dir::Up);
+                    }
+                },
+                Dir::Down => {
+                    if self.target[0] < self.road.0 && self.target[1] < self.road.1 {
+                        next_road = (self.road.0 - 1, self.road.1, Dir::Down);
+                    }
+                    if self.target[0] < self.road.0 && self.target[1] > self.road.1 {
+                        next_road = (self.road.0 - 1, self.road.1, Dir::Down);
+                    }
+                    if self.target[0] > self.road.0 && self.target[1] < self.road.1 {
+                        next_road = (self.road.0 - 1, self.road.1 - 1, Dir::Right);
+                    }
+                    if self.target[0] > self.road.0 && self.target[1] > self.road.1 {
+                        next_road = (self.road.0, self.road.1, Dir::Left);
+                    }
+                },
+            }
+            return Some(next_road);
+        }
     }
 }
 
