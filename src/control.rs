@@ -68,7 +68,7 @@ impl<'a, T: three::Object> Control<'a, T> {
 
         if self.mouse_pressed[0] {
             let new_pos: [f32; 2] = window.input.mouse_pos_ndc().into();
-            let diff = [new_pos[0] - self.mouse_pressed_pos[0][0], new_pos[1] - self.mouse_pressed_pos[0][1]];
+            let mut diff = [new_pos[0] - self.mouse_pressed_pos[0][0], new_pos[1] - self.mouse_pressed_pos[0][1]];
             self.mouse_pressed_pos[0] = new_pos;
 
             let (width, height): (u32, u32) = match window.glutin_window().get_inner_size() {
@@ -80,7 +80,12 @@ impl<'a, T: three::Object> Control<'a, T> {
 
             let multiplier = self.camera_position[2];
 
-            self.camera_position = [self.camera_position[0] - diff[0]*multiplier*aspect_ratio, self.camera_position[1] - diff[1]*multiplier, self.camera_position[2]];
+            diff[0] *= multiplier;
+            diff[1] *= multiplier;
+
+            let la = self.camera_lookat;
+
+            self.camera_position = [self.camera_position[0] - diff[0]*la[1] - diff[1]*la[0], self.camera_position[1] - diff[1]*la[1] + diff[0]*la[0], self.camera_position[2]];
         }
 
         if self.mouse_pressed[1] {
