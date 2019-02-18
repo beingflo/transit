@@ -88,10 +88,11 @@ impl<'a, T: three::Object> Control<'a, T> {
             let diff = [new_pos[0] - self.mouse_pressed_pos[1][0], new_pos[1] - self.mouse_pressed_pos[1][1]];
             self.mouse_pressed_pos[1] = new_pos;
 
-            let rotation_x: cgmath::Quaternion<f32> = cgmath::Quaternion::from_axis_angle(cgmath::Vector3::new(1.0, 0.0, 0.0), cgmath::Deg(-diff[1]*VIEWING_SENSITIVITY));
-            let rotation_z: cgmath::Quaternion<f32> = cgmath::Quaternion::from_axis_angle(cgmath::Vector3::new(0.0, 0.0, 1.0), cgmath::Deg(diff[0]*VIEWING_SENSITIVITY));
+            let up = cgmath::Vector3::new(0.0, 0.0, 1.0);
+            let rotation_vertical: cgmath::Quaternion<f32> = cgmath::Quaternion::from_axis_angle(up.cross(self.camera_lookat.into()), cgmath::Deg(diff[1]*VIEWING_SENSITIVITY));
+            let rotation_z: cgmath::Quaternion<f32> = cgmath::Quaternion::from_axis_angle(up, cgmath::Deg(diff[0]*VIEWING_SENSITIVITY));
 
-            self.camera_lookat = rotation_x.rotate_vector(self.camera_lookat.into()).into();
+            self.camera_lookat = rotation_vertical.rotate_vector(self.camera_lookat.into()).into();
             self.camera_lookat = rotation_z.rotate_vector(self.camera_lookat.into()).into();
 
             self.camera.look_at([0.0, 0.0, 0.0], self.camera_lookat, None);
