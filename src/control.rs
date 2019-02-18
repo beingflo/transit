@@ -85,6 +85,9 @@ impl<'a, T: three::Object> Control<'a, T> {
 
             let la = self.camera_lookat;
 
+            let len = (la[0] * la[0] + la[1] * la[1]).sqrt();
+            let la = [la[0] / len, la[1] / len];
+
             self.camera_position = [self.camera_position[0] - diff[0]*la[1] - diff[1]*la[0], self.camera_position[1] - diff[1]*la[1] + diff[0]*la[0], self.camera_position[2]];
         }
 
