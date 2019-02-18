@@ -4,7 +4,7 @@ use cgmath;
 use cgmath::Rotation3;
 use cgmath::Rotation;
 
-const MOUSE_SENSITIVITY: f32 = 0.002;
+const MOUSEWHEEL_SENSITIVITY: f32 = 0.002;
 const VIEWING_SENSITIVITY: f32 = 50.0;
 
 pub struct Control<'a, T: three::Object> {
@@ -99,6 +99,8 @@ impl<'a, T: three::Object> Control<'a, T> {
         }
 
         self.camera.set_position(self.camera_position);
-        self.camera_position[2] *= 1.0 - window.input.mouse_wheel() * MOUSE_SENSITIVITY;
+        self.camera_position[0] += self.camera_lookat[0] * MOUSEWHEEL_SENSITIVITY * window.input.mouse_wheel() * self.camera_position[2];
+        self.camera_position[1] += self.camera_lookat[1] * MOUSEWHEEL_SENSITIVITY * window.input.mouse_wheel() * self.camera_position[2];
+        self.camera_position[2] += self.camera_lookat[2] * MOUSEWHEEL_SENSITIVITY * window.input.mouse_wheel() * self.camera_position[2];
     }
 }
