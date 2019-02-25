@@ -31,16 +31,15 @@ impl Map {
 
         let transporter_template = window.factory.mesh(quad, material);
 
-
         // Set up buildings
         let mut buildings = Vec::new();
-        for i in -GRID_SIZE .. GRID_SIZE {
-            for j in -GRID_SIZE .. GRID_SIZE {
+        for i in -GRID_SIZE..GRID_SIZE {
+            for j in -GRID_SIZE..GRID_SIZE {
                 let building = window.factory.mesh_instance(&building_template);
                 building.set_scale(BLOCK_SIZE);
                 building.set_position([i as f32, j as f32, 0.0]);
 
-                buildings.push(Building::new([i,j]));
+                buildings.push(Building::new([i, j]));
 
                 window.scene.add(&building);
             }
@@ -48,12 +47,12 @@ impl Map {
 
         // Set up Roads
         let mut roads = HashMap::new();
-        for i in -GRID_SIZE .. GRID_SIZE {
-            for j in -GRID_SIZE .. GRID_SIZE {
-                roads.insert((i,j, Dir::Left), 0);
-                roads.insert((i,j, Dir::Down), 0);
-                roads.insert((i,j, Dir::Right), 0);
-                roads.insert((i,j, Dir::Up), 0);
+        for i in -GRID_SIZE..GRID_SIZE {
+            for j in -GRID_SIZE..GRID_SIZE {
+                roads.insert((i, j, Dir::Left), 0);
+                roads.insert((i, j, Dir::Down), 0);
+                roads.insert((i, j, Dir::Right), 0);
+                roads.insert((i, j, Dir::Up), 0);
             }
         }
 
@@ -65,15 +64,19 @@ impl Map {
             transporter.set_scale(CAR_SIZE);
             window.scene.add(&transporter);
 
-            let i = (rand::random::<u32>() % ((GRID_SIZE-2) as u32 * 2)) as i32 - GRID_SIZE+1;
-            let j = (rand::random::<u32>() % ((GRID_SIZE-2) as u32 * 2)) as i32 - GRID_SIZE+1;
+            let i = (rand::random::<u32>() % ((GRID_SIZE - 2) as u32 * 2)) as i32 - GRID_SIZE + 1;
+            let j = (rand::random::<u32>() % ((GRID_SIZE - 2) as u32 * 2)) as i32 - GRID_SIZE + 1;
 
             let road = (i, j, Dir::Right);
             *roads.get_mut(&road).unwrap() += 1;
             transporters.push(Transporter::new(transporter, road));
         }
 
-        Self { buildings, roads, transporters }
+        Self {
+            buildings,
+            roads,
+            transporters,
+        }
     }
 
     pub fn update(&mut self) {
@@ -98,7 +101,10 @@ struct Building {
 
 impl Building {
     fn new(pos: [i32; 2]) -> Self {
-        Self { pos, wares: Vec::new() }
+        Self {
+            pos,
+            wares: Vec::new(),
+        }
     }
 }
 
@@ -117,7 +123,15 @@ struct Transporter {
 
 impl Transporter {
     fn new(mesh: three::Mesh, road: Road) -> Self {
-        Self { mesh, src: [road.0, road.1], target: [0,0], road, next_road: None, steps: 0, cargo: None }
+        Self {
+            mesh,
+            src: [road.0, road.1],
+            target: [0, 0],
+            road,
+            next_road: None,
+            steps: 0,
+            cargo: None,
+        }
     }
 
     fn set_target(&mut self, target: [i32; 2]) {
@@ -133,7 +147,7 @@ impl Transporter {
             match self.next_road() {
                 Some(road) => {
                     self.road = road;
-                },
+                }
                 None => {
                     self.next_road = None;
                     return;
@@ -175,7 +189,7 @@ impl Transporter {
                     if self.target[0] == self.road.0 && self.target[1] == self.road.1 {
                         return None;
                     }
-                },
+                }
                 Dir::Up => {
                     if self.target[0] < self.road.0 {
                         return Some((self.road.0, self.road.1, Dir::Right));
@@ -193,7 +207,7 @@ impl Transporter {
                     if self.target[0] == self.road.0 && self.target[1] == self.road.1 {
                         return None;
                     }
-                },
+                }
                 Dir::Right => {
                     if self.target[0] < self.road.0 {
                         return Some((self.road.0, self.road.1, Dir::Down));
@@ -211,7 +225,7 @@ impl Transporter {
                     if self.target[0] == self.road.0 && self.target[1] == self.road.1 {
                         return None;
                     }
-                },
+                }
                 Dir::Down => {
                     if self.target[0] < self.road.0 {
                         return Some((self.road.0 - 1, self.road.1, Dir::Down));
@@ -252,7 +266,8 @@ fn road_to_spatial(road: (i32, i32, Dir), steps: u32) -> ([f32; 2], Quaternion<f
 
     let drivable_block_size = BLOCK_SIZE - CAR_SIZE;
 
-    let progress = steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * drivable_block_size - drivable_block_size;
+    let progress =
+        steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * drivable_block_size - drivable_block_size;
     let offset = 0.475;
 
     let deg = match road.2 {
@@ -261,25 +276,25 @@ fn road_to_spatial(road: (i32, i32, Dir), steps: u32) -> ([f32; 2], Quaternion<f
             pos[1] += progress;
 
             0.0
-        },
+        }
         Dir::Down => {
             pos[0] -= progress;
             pos[1] -= offset;
 
             270.0
-        },
+        }
         Dir::Right => {
             pos[0] += offset;
             pos[1] -= progress;
 
             180.0
-        },
+        }
         Dir::Up => {
             pos[0] += progress;
             pos[1] += offset;
 
             90.0
-        },
+        }
     };
 
     let rot = Quaternion::<f32>::from(Euler::new(Deg(0.0), Deg(0.0), Deg(deg)));

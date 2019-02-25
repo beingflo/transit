@@ -1,8 +1,8 @@
 use three;
 
 use cgmath;
-use cgmath::Rotation3;
 use cgmath::Rotation;
+use cgmath::Rotation3;
 
 const MOUSEWHEEL_SENSITIVITY: f32 = 0.002;
 const VIEWING_SENSITIVITY: f32 = 50.0;
@@ -19,7 +19,6 @@ pub struct Control<'a, T: three::Object> {
     quit: bool,
 }
 
-
 impl<'a, T: three::Object> Control<'a, T> {
     pub fn new(object: &'a T) -> Self {
         let camera_position = [0.0, 0.0, 0.5];
@@ -28,7 +27,15 @@ impl<'a, T: three::Object> Control<'a, T> {
         object.set_position(camera_position);
         object.look_at([0.0, 0.0, 0.0], camera_lookat, None);
 
-        Self { quit: false, toggle_fullscreen: false, camera: object, camera_position, camera_lookat, mouse_pressed: [false; 2], mouse_pressed_pos: [[0.0, 0.0]; 2] }
+        Self {
+            quit: false,
+            toggle_fullscreen: false,
+            camera: object,
+            camera_position,
+            camera_lookat,
+            mouse_pressed: [false; 2],
+            mouse_pressed_pos: [[0.0, 0.0]; 2],
+        }
     }
 
     pub fn should_quit(&self) -> bool {
@@ -68,7 +75,10 @@ impl<'a, T: three::Object> Control<'a, T> {
 
         if self.mouse_pressed[0] {
             let new_pos: [f32; 2] = window.input.mouse_pos_ndc().into();
-            let mut diff = [new_pos[0] - self.mouse_pressed_pos[0][0], new_pos[1] - self.mouse_pressed_pos[0][1]];
+            let mut diff = [
+                new_pos[0] - self.mouse_pressed_pos[0][0],
+                new_pos[1] - self.mouse_pressed_pos[0][1],
+            ];
             self.mouse_pressed_pos[0] = new_pos;
 
             let (width, height): (u32, u32) = match window.glutin_window().get_inner_size() {
@@ -88,27 +98,50 @@ impl<'a, T: three::Object> Control<'a, T> {
             let len = (la[0] * la[0] + la[1] * la[1]).sqrt();
             let la = [la[0] / len, la[1] / len];
 
-            self.camera_position = [self.camera_position[0] - diff[0]*la[1] - diff[1]*la[0], self.camera_position[1] - diff[1]*la[1] + diff[0]*la[0], self.camera_position[2]];
+            self.camera_position = [
+                self.camera_position[0] - diff[0] * la[1] - diff[1] * la[0],
+                self.camera_position[1] - diff[1] * la[1] + diff[0] * la[0],
+                self.camera_position[2],
+            ];
         }
 
         if self.mouse_pressed[1] {
             let new_pos: [f32; 2] = window.input.mouse_pos_ndc().into();
-            let diff = [new_pos[0] - self.mouse_pressed_pos[1][0], new_pos[1] - self.mouse_pressed_pos[1][1]];
+            let diff = [
+                new_pos[0] - self.mouse_pressed_pos[1][0],
+                new_pos[1] - self.mouse_pressed_pos[1][1],
+            ];
             self.mouse_pressed_pos[1] = new_pos;
 
             let up = cgmath::Vector3::new(0.0, 0.0, 1.0);
-            let rotation_vertical: cgmath::Quaternion<f32> = cgmath::Quaternion::from_axis_angle(up.cross(self.camera_lookat.into()), cgmath::Deg(diff[1]*VIEWING_SENSITIVITY));
-            let rotation_z: cgmath::Quaternion<f32> = cgmath::Quaternion::from_axis_angle(up, cgmath::Deg(diff[0]*VIEWING_SENSITIVITY));
+            let rotation_vertical: cgmath::Quaternion<f32> = cgmath::Quaternion::from_axis_angle(
+                up.cross(self.camera_lookat.into()),
+                cgmath::Deg(diff[1] * VIEWING_SENSITIVITY),
+            );
+            let rotation_z: cgmath::Quaternion<f32> =
+                cgmath::Quaternion::from_axis_angle(up, cgmath::Deg(diff[0] * VIEWING_SENSITIVITY));
 
-            self.camera_lookat = rotation_vertical.rotate_vector(self.camera_lookat.into()).into();
+            self.camera_lookat = rotation_vertical
+                .rotate_vector(self.camera_lookat.into())
+                .into();
             self.camera_lookat = rotation_z.rotate_vector(self.camera_lookat.into()).into();
 
-            self.camera.look_at([0.0, 0.0, 0.0], self.camera_lookat, None);
+            self.camera
+                .look_at([0.0, 0.0, 0.0], self.camera_lookat, None);
         }
 
         self.camera.set_position(self.camera_position);
-        self.camera_position[0] += self.camera_lookat[0] * MOUSEWHEEL_SENSITIVITY * window.input.mouse_wheel() * self.camera_position[2];
-        self.camera_position[1] += self.camera_lookat[1] * MOUSEWHEEL_SENSITIVITY * window.input.mouse_wheel() * self.camera_position[2];
-        self.camera_position[2] += self.camera_lookat[2] * MOUSEWHEEL_SENSITIVITY * window.input.mouse_wheel() * self.camera_position[2];
+        self.camera_position[0] += self.camera_lookat[0]
+            * MOUSEWHEEL_SENSITIVITY
+            * window.input.mouse_wheel()
+            * self.camera_position[2];
+        self.camera_position[1] += self.camera_lookat[1]
+            * MOUSEWHEEL_SENSITIVITY
+            * window.input.mouse_wheel()
+            * self.camera_position[2];
+        self.camera_position[2] += self.camera_lookat[2]
+            * MOUSEWHEEL_SENSITIVITY
+            * window.input.mouse_wheel()
+            * self.camera_position[2];
     }
 }

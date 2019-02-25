@@ -1,20 +1,20 @@
-mod util;
-mod ui;
 mod control;
 mod map;
+mod ui;
+mod util;
 
 use three;
 
-use ui::Ui;
 use control::Control;
 use map::Map;
+use ui::Ui;
 
 // White
 const BACKGROUND: u32 = 0xFFFFFF;
 
 fn main() {
     let mut window = three::Window::builder("Transit").multisampling(8).build();
-    let camera = window.factory.perspective_camera(90.0, 0.01 .. );
+    let camera = window.factory.perspective_camera(90.0, 0.01..);
 
     let mut control = Control::new(&camera);
     let mut ui = Ui::new(&mut window);

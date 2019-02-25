@@ -34,7 +34,12 @@ impl Ui {
 
         window.scene.add(&fps);
 
-        Self { fps, time: 0.0, last: 0.0, size }
+        Self {
+            fps,
+            time: 0.0,
+            last: 0.0,
+            size,
+        }
     }
 
     pub fn update(&mut self, window: &three::Window) {

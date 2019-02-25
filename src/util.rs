@@ -8,18 +8,15 @@ pub fn create_quad(window: &mut three::Window, scale: [f32; 2]) -> three::Mesh {
         [-1.0, 1.0, 0.0].into(),
     ];
 
-    let faces = vec![
-        [0, 1, 2],
-        [2, 3, 0],
-    ];
+    let faces = vec![[0, 1, 2], [2, 3, 0]];
 
     let mut quad = three::Geometry {
         faces,
         base: three::Shape {
             vertices,
-            .. three::Shape::default()
+            ..three::Shape::default()
         },
-        .. three::Geometry::default()
+        ..three::Geometry::default()
     };
 
     for v in quad.base.vertices.iter_mut() {
@@ -27,9 +24,7 @@ pub fn create_quad(window: &mut three::Window, scale: [f32; 2]) -> three::Mesh {
         v.y *= scale[1];
     }
 
-    let material = three::material::Line {
-        color: 0x000000,
-    };
+    let material = three::material::Line { color: 0x000000 };
 
     let mesh = window.factory.mesh(quad, material);
 
@@ -52,17 +47,17 @@ pub fn create_circle(window: &mut three::Window, segments: u32) -> three::Mesh {
 
     let mut faces = Vec::new();
 
-    for i in 0..segments+1 {
-        faces.push([0, (i+2) % segments+1, (i+1) % segments+1]);
+    for i in 0..segments + 1 {
+        faces.push([0, (i + 2) % segments + 1, (i + 1) % segments + 1]);
     }
 
     let circle = three::Geometry {
         faces,
         base: three::Shape {
             vertices,
-            .. three::Shape::default()
+            ..three::Shape::default()
         },
-        .. three::Geometry::default()
+        ..three::Geometry::default()
     };
 
     let material = three::material::Basic {
