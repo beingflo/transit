@@ -81,13 +81,6 @@ impl<'a, T: three::Object> Control<'a, T> {
             ];
             self.mouse_pressed_pos[0] = new_pos;
 
-            let (width, height): (u32, u32) = match window.glutin_window().get_inner_size() {
-                None => panic!("Window doesn't exist"),
-                Some(size) => size.into(),
-            };
-
-            let aspect_ratio = width as f32 / height as f32;
-
             let multiplier = self.camera_position[2];
 
             diff[0] *= multiplier;

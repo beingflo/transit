@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use rand;
 
 use three;
@@ -7,297 +5,68 @@ use three::object::Object;
 
 use cgmath::{Deg, Euler, Quaternion};
 
-const GRID_SIZE: i32 = 50;
-const BLOCK_SIZE: f32 = 0.45;
-const CAR_SIZE: f32 = 0.03;
-const STEPS_PER_ROAD: u32 = 240;
-
-type Road = (i32, i32, Dir);
+const AGENT_SIZE: f32 = 0.1;
+const MAX_SPAWN: f32 = 100.0;
 
 pub struct Map {
-    buildings: Vec<Building>,
-    roads: HashMap<Road, u32>,
-    transporters: Vec<Transporter>,
+    agents: Vec<Agent>,
 }
 
 impl Map {
-    pub fn new(window: &mut three::Window) -> Self {
-        let quad = three::Geometry::cuboid(1.5, 1.5, 0.3);
+    pub fn new(window: &mut three::Window, num_agent: u32) -> Self {
         let material = three::material::Line { color: 0x000000 };
-
-        let building_template = window.factory.mesh(quad, material.clone());
-
         let quad = three::Geometry::cuboid(1.0, 2.0, 0.5);
 
-        let transporter_template = window.factory.mesh(quad, material);
+        let agent_template = window.factory.mesh(quad, material);
 
-        // Set up buildings
-        let mut buildings = Vec::new();
-        for i in -GRID_SIZE..GRID_SIZE {
-            for j in -GRID_SIZE..GRID_SIZE {
-                let building = window.factory.mesh_instance(&building_template);
-                building.set_scale(BLOCK_SIZE);
-                building.set_position([i as f32, j as f32, 0.0]);
+        // Set up Agents
+        let mut agents = Vec::new();
+        for _ in 0..num_agent {
+            let agent = window.factory.mesh_instance(&agent_template);
 
-                buildings.push(Building::new([i, j]));
+            agent.set_scale(AGENT_SIZE);
+            window.scene.add(&agent);
 
-                window.scene.add(&building);
-            }
-        }
+            let x = rand::random::<f32>() * 2.0 * MAX_SPAWN - MAX_SPAWN;
+            let y = rand::random::<f32>() * 2.0 * MAX_SPAWN - MAX_SPAWN;
 
-        // Set up Roads
-        let mut roads = HashMap::new();
-        for i in -GRID_SIZE..GRID_SIZE {
-            for j in -GRID_SIZE..GRID_SIZE {
-                roads.insert((i, j, Dir::Left), 0);
-                roads.insert((i, j, Dir::Down), 0);
-                roads.insert((i, j, Dir::Right), 0);
-                roads.insert((i, j, Dir::Up), 0);
-            }
-        }
+            let deg = rand::random::<f32>() * 360.0;
 
-        // Set up Transporters
-        let mut transporters = Vec::new();
-        for _ in 0..5000 {
-            let transporter = window.factory.mesh_instance(&transporter_template);
-
-            transporter.set_scale(CAR_SIZE);
-            window.scene.add(&transporter);
-
-            let i = (rand::random::<u32>() % ((GRID_SIZE - 2) as u32 * 2)) as i32 - GRID_SIZE + 1;
-            let j = (rand::random::<u32>() % ((GRID_SIZE - 2) as u32 * 2)) as i32 - GRID_SIZE + 1;
-
-            let road = (i, j, Dir::Right);
-            *roads.get_mut(&road).unwrap() += 1;
-            transporters.push(Transporter::new(transporter, road));
+            agents.push(Agent::new(agent, (x,y), deg));
         }
 
         Self {
-            buildings,
-            roads,
-            transporters,
+            agents,
         }
     }
 
     pub fn update(&mut self) {
-        for t in self.transporters.iter_mut() {
-            t.update(&mut self.roads);
+        for t in self.agents.iter_mut() {
+            t.update();
         }
     }
 }
 
-#[derive(PartialEq, Eq, Hash, Copy, Clone)]
-enum Dir {
-    Left,
-    Down,
-    Right,
-    Up,
-}
-
-struct Building {
-    pos: [i32; 2],
-    wares: Vec<Item>,
-}
-
-impl Building {
-    fn new(pos: [i32; 2]) -> Self {
-        Self {
-            pos,
-            wares: Vec::new(),
-        }
-    }
-}
-
-struct Transporter {
+struct Agent {
     mesh: three::Mesh,
-
-    src: [i32; 2],
-    target: [i32; 2],
-
-    road: Road,
-    next_road: Option<Road>,
-    steps: u32,
-
-    cargo: Option<Item>,
+    position: (f32, f32),
+    rotation: f32,
 }
 
-impl Transporter {
-    fn new(mesh: three::Mesh, road: Road) -> Self {
+impl Agent {
+    fn new(mesh: three::Mesh, position: (f32, f32), rotation: f32) -> Self {
         Self {
             mesh,
-            src: [road.0, road.1],
-            target: [0, 0],
-            road,
-            next_road: None,
-            steps: 0,
-            cargo: None,
+            position,
+            rotation,
         }
     }
 
-    fn set_target(&mut self, target: [i32; 2]) {
-        self.target = target;
-    }
-
-    fn update(&mut self, roads: &mut HashMap<Road, u32>) {
-        self.steps += 1;
-
-        if self.steps >= STEPS_PER_ROAD {
-            *roads.get_mut(&self.road).unwrap() -= 1;
-
-            match self.next_road() {
-                Some(road) => {
-                    self.road = road;
-                }
-                None => {
-                    self.next_road = None;
-                    return;
-                }
-            }
-
-            *roads.get_mut(&self.road).unwrap() += 1;
-
-            self.steps = 0;
-        }
-
+    fn update(&mut self) {
         // Drawing
-        let (pos, rot) = road_to_spatial(self.road, self.steps);
-        self.mesh.set_position([pos[0], pos[1], 0.0]);
+        self.mesh.set_position([self.position.0, self.position.1, 0.0]);
+
+        let rot = Quaternion::<f32>::from(Euler::new(Deg(0.0), Deg(0.0), Deg(self.rotation)));
         self.mesh.set_orientation(rot);
     }
-
-    fn next_road(&self) -> Option<Road> {
-        if self.road.0 == self.target[0] && self.road.1 == self.target[1] {
-            // Arrived at destination
-            return None;
-        } else {
-            // Continue
-            match self.road.2 {
-                Dir::Left => {
-                    if self.target[0] < self.road.0 {
-                        return Some((self.road.0 - 1, self.road.1 + 1, Dir::Down));
-                    }
-                    if self.target[0] > self.road.0 {
-                        return Some((self.road.0, self.road.1, Dir::Up));
-                    }
-                    if self.target[0] == self.road.0 && self.target[1] < self.road.1 {
-                        return Some((self.road.0, self.road.1, Dir::Up));
-                    }
-                    if self.target[0] == self.road.0 && self.target[1] > self.road.1 {
-                        return Some((self.road.0, self.road.1 + 1, Dir::Left));
-                    }
-
-                    if self.target[0] == self.road.0 && self.target[1] == self.road.1 {
-                        return None;
-                    }
-                }
-                Dir::Up => {
-                    if self.target[0] < self.road.0 {
-                        return Some((self.road.0, self.road.1, Dir::Right));
-                    }
-                    if self.target[0] > self.road.0 {
-                        return Some((self.road.0 + 1, self.road.1, Dir::Up));
-                    }
-                    if self.target[0] == self.road.0 && self.target[1] < self.road.1 {
-                        return Some((self.road.0, self.road.1, Dir::Right));
-                    }
-                    if self.target[0] == self.road.0 && self.target[1] > self.road.1 {
-                        return Some((self.road.0 + 1, self.road.1 + 1, Dir::Left));
-                    }
-
-                    if self.target[0] == self.road.0 && self.target[1] == self.road.1 {
-                        return None;
-                    }
-                }
-                Dir::Right => {
-                    if self.target[0] < self.road.0 {
-                        return Some((self.road.0, self.road.1, Dir::Down));
-                    }
-                    if self.target[0] > self.road.0 {
-                        return Some((self.road.0 + 1, self.road.1 - 1, Dir::Up));
-                    }
-                    if self.target[0] == self.road.0 && self.target[1] < self.road.1 {
-                        return Some((self.road.0, self.road.1 - 1, Dir::Right));
-                    }
-                    if self.target[0] == self.road.0 && self.target[1] > self.road.1 {
-                        return Some((self.road.0, self.road.1, Dir::Down));
-                    }
-
-                    if self.target[0] == self.road.0 && self.target[1] == self.road.1 {
-                        return None;
-                    }
-                }
-                Dir::Down => {
-                    if self.target[0] < self.road.0 {
-                        return Some((self.road.0 - 1, self.road.1, Dir::Down));
-                    }
-                    if self.target[0] > self.road.0 {
-                        return Some((self.road.0, self.road.1, Dir::Left));
-                    }
-                    if self.target[0] == self.road.0 && self.target[1] < self.road.1 {
-                        return Some((self.road.0 - 1, self.road.1 - 1, Dir::Right));
-                    }
-                    if self.target[0] == self.road.0 && self.target[1] > self.road.1 {
-                        return Some((self.road.0, self.road.1, Dir::Left));
-                    }
-
-                    if self.target[0] == self.road.0 && self.target[1] == self.road.1 {
-                        return None;
-                    }
-                }
-            }
-            return None;
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-struct Item {
-    value: u32,
-}
-
-impl Item {
-    fn new(value: u32) -> Self {
-        Self { value }
-    }
-}
-
-fn road_to_spatial(road: (i32, i32, Dir), steps: u32) -> ([f32; 2], Quaternion<f32>) {
-    let mut pos = [road.0 as f32, road.1 as f32];
-
-    let drivable_block_size = BLOCK_SIZE - CAR_SIZE;
-
-    let progress =
-        steps as f32 / STEPS_PER_ROAD as f32 * 2.0 * drivable_block_size - drivable_block_size;
-    let offset = 0.475;
-
-    let deg = match road.2 {
-        Dir::Left => {
-            pos[0] -= offset;
-            pos[1] += progress;
-
-            0.0
-        }
-        Dir::Down => {
-            pos[0] -= progress;
-            pos[1] -= offset;
-
-            270.0
-        }
-        Dir::Right => {
-            pos[0] += offset;
-            pos[1] -= progress;
-
-            180.0
-        }
-        Dir::Up => {
-            pos[0] += progress;
-            pos[1] += offset;
-
-            90.0
-        }
-    };
-
-    let rot = Quaternion::<f32>::from(Euler::new(Deg(0.0), Deg(0.0), Deg(deg)));
-
-    (pos, rot)
 }
