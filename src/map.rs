@@ -3,9 +3,10 @@ use rand;
 use three;
 use three::object::Object;
 
-use cgmath::{Deg, Euler, Quaternion};
+use cgmath::{Rad, Euler, Quaternion};
 
 const AGENT_SIZE: f32 = 0.1;
+const AGENT_SPEED: f32 = 0.01;
 const MAX_SPAWN: f32 = 100.0;
 
 pub struct Map {
@@ -30,7 +31,7 @@ impl Map {
             let x = rand::random::<f32>() * 2.0 * MAX_SPAWN - MAX_SPAWN;
             let y = rand::random::<f32>() * 2.0 * MAX_SPAWN - MAX_SPAWN;
 
-            let deg = rand::random::<f32>() * 360.0;
+            let deg = rand::random::<f32>() * 2.0 * std::f32::consts::PI;
 
             agents.push(Agent::new(agent, (x,y), deg));
         }
@@ -41,8 +42,9 @@ impl Map {
     }
 
     pub fn update(&mut self) {
-        for t in self.agents.iter_mut() {
-            t.update();
+        for a in self.agents.iter_mut() {
+            a.update();
+            a.draw();
         }
     }
 }
@@ -55,18 +57,23 @@ struct Agent {
 
 impl Agent {
     fn new(mesh: three::Mesh, position: (f32, f32), rotation: f32) -> Self {
-        Self {
+        let mut agent = Self {
             mesh,
             position,
             rotation,
-        }
+        };
+        agent.draw();
+        agent
     }
 
     fn update(&mut self) {
-        // Drawing
-        self.mesh.set_position([self.position.0, self.position.1, 0.0]);
+        self.position.0 += AGENT_SPEED * self.rotation.sin();
+        self.position.1 += AGENT_SPEED * self.rotation.cos();
+    }
 
-        let rot = Quaternion::<f32>::from(Euler::new(Deg(0.0), Deg(0.0), Deg(self.rotation)));
+    fn draw(&mut self) {
+        self.mesh.set_position([self.position.0, self.position.1, 0.0]);
+        let rot = Quaternion::<f32>::from(Euler::new(Rad(0.0), Rad(0.0), Rad(-self.rotation)));
         self.mesh.set_orientation(rot);
     }
 }
