@@ -8,3 +8,4 @@ edition = "2018"
 three = "0.4.0"
 cgmath = { version = "0.17.0", features = ["mint"] }
 rand = "*"
+spade = "1.7.0"

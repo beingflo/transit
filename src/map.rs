@@ -3,14 +3,17 @@ use rand;
 use three;
 use three::object::Object;
 
-use cgmath::{Rad, Euler, Quaternion};
+use cgmath::{Rad, Euler, Quaternion, Vector2};
+use cgmath::prelude::*;
 
 const AGENT_SIZE: f32 = 0.1;
 const AGENT_SPEED: f32 = 0.01;
-const MAX_SPAWN: f32 = 100.0;
+const MAX_SPAWN: f32 = 10.0;
 
+#[derive(Clone)]
 pub struct Map {
     agents: Vec<Agent>,
+    agent_meshes: Vec<three::Mesh>,
 }
 
 impl Map {
@@ -22,58 +25,79 @@ impl Map {
 
         // Set up Agents
         let mut agents = Vec::new();
+        let mut agent_meshes = Vec::new();
         for _ in 0..num_agent {
-            let agent = window.factory.mesh_instance(&agent_template);
+            let mesh = window.factory.mesh_instance(&agent_template);
 
-            agent.set_scale(AGENT_SIZE);
-            window.scene.add(&agent);
+            mesh.set_scale(AGENT_SIZE);
+            window.scene.add(&mesh);
 
             let x = rand::random::<f32>() * 2.0 * MAX_SPAWN - MAX_SPAWN;
             let y = rand::random::<f32>() * 2.0 * MAX_SPAWN - MAX_SPAWN;
 
             let deg = rand::random::<f32>() * 2.0 * std::f32::consts::PI;
 
-            agents.push(Agent::new(agent, (x,y), deg));
+            agents.push(Agent::new(Vector2::new(x,y), deg));
+            agent_meshes.push(mesh);
         }
 
         Self {
             agents,
+            agent_meshes,
         }
     }
 
     pub fn update(&mut self) {
+        let agents_copy = self.agents.clone();
+
+        for i in 0..1 {
+            let mut min_distance = std::f32::MAX;
+            let mut min_distance_id = 0;
+            let agenti = &agents_copy[i];
+
+            for j in i..agents_copy.len() {
+                if j == i {
+                    continue;
+                }
+                let agentj = &agents_copy[j];
+                let distance = agenti.position.distance(agentj.position);
+                if distance < min_distance {
+                    min_distance = distance;
+                    min_distance_id = j;
+                }
+            }
+        }
+
         for a in self.agents.iter_mut() {
             a.update();
-            a.draw();
+        }
+    }
+
+    pub fn draw(&self) {
+        for (agent, mesh) in self.agents.iter().zip(self.agent_meshes.iter()) {
+            mesh.set_position([agent.position.x, agent.position.y, 0.0]);
+            let rot = Quaternion::<f32>::from(Euler::new(Rad(0.0), Rad(0.0), Rad(-agent.rotation)));
+            mesh.set_orientation(rot);
         }
     }
 }
 
+#[derive(Clone)]
 struct Agent {
-    mesh: three::Mesh,
-    position: (f32, f32),
+    position: Vector2<f32>,
     rotation: f32,
 }
 
 impl Agent {
-    fn new(mesh: three::Mesh, position: (f32, f32), rotation: f32) -> Self {
-        let mut agent = Self {
-            mesh,
+    fn new(position: Vector2<f32>, rotation: f32) -> Self {
+        Self {
             position,
             rotation,
-        };
-        agent.draw();
-        agent
+        }
     }
 
     fn update(&mut self) {
-        self.position.0 += AGENT_SPEED * self.rotation.sin();
-        self.position.1 += AGENT_SPEED * self.rotation.cos();
-    }
-
-    fn draw(&mut self) {
-        self.mesh.set_position([self.position.0, self.position.1, 0.0]);
-        let rot = Quaternion::<f32>::from(Euler::new(Rad(0.0), Rad(0.0), Rad(-self.rotation)));
-        self.mesh.set_orientation(rot);
+        self.position.x += AGENT_SPEED * self.rotation.sin();
+        self.position.y += AGENT_SPEED * self.rotation.cos();
     }
 }
