@@ -4,11 +4,11 @@ use three;
 use three::object::Object;
 
 use cgmath::{Rad, Euler, Quaternion, Vector2};
-use cgmath::prelude::*;
 
 const AGENT_SIZE: f32 = 0.1;
-const AGENT_SPEED: f32 = 0.01;
-const MAX_SPAWN: f32 = 10.0;
+const DT: f32 = 0.01;
+const MAX_SPAWN: f32 = 20.0;
+const MAX_VEL: f32 = 1.0;
 
 #[derive(Clone)]
 pub struct Map {
@@ -35,9 +35,10 @@ impl Map {
             let x = rand::random::<f32>() * 2.0 * MAX_SPAWN - MAX_SPAWN;
             let y = rand::random::<f32>() * 2.0 * MAX_SPAWN - MAX_SPAWN;
 
-            let deg = rand::random::<f32>() * 2.0 * std::f32::consts::PI;
+            let velocityx = rand::random::<f32>() * 2.0 * MAX_VEL - MAX_VEL;
+            let velocityy = rand::random::<f32>() * 2.0 * MAX_VEL - MAX_VEL;
 
-            agents.push(Agent::new(Vector2::new(x,y), deg));
+            agents.push(Agent::new(Vector2::new(x,y), Vector2::new(velocityx, velocityy)));
             agent_meshes.push(mesh);
         }
 
@@ -48,26 +49,6 @@ impl Map {
     }
 
     pub fn update(&mut self) {
-        let agents_copy = self.agents.clone();
-
-        for i in 0..1 {
-            let mut min_distance = std::f32::MAX;
-            let mut min_distance_id = 0;
-            let agenti = &agents_copy[i];
-
-            for j in i..agents_copy.len() {
-                if j == i {
-                    continue;
-                }
-                let agentj = &agents_copy[j];
-                let distance = agenti.position.distance(agentj.position);
-                if distance < min_distance {
-                    min_distance = distance;
-                    min_distance_id = j;
-                }
-            }
-        }
-
         for a in self.agents.iter_mut() {
             a.update();
         }
@@ -76,7 +57,7 @@ impl Map {
     pub fn draw(&self) {
         for (agent, mesh) in self.agents.iter().zip(self.agent_meshes.iter()) {
             mesh.set_position([agent.position.x, agent.position.y, 0.0]);
-            let rot = Quaternion::<f32>::from(Euler::new(Rad(0.0), Rad(0.0), Rad(-agent.rotation)));
+            let rot = Quaternion::from(Euler::new(Rad(0.0), Rad(0.0), Rad((agent.velocity.y/agent.velocity.x).atan() - std::f32::consts::PI / 2.0)));
             mesh.set_orientation(rot);
         }
     }
@@ -85,19 +66,18 @@ impl Map {
 #[derive(Clone)]
 struct Agent {
     position: Vector2<f32>,
-    rotation: f32,
+    velocity: Vector2<f32>,
 }
 
 impl Agent {
-    fn new(position: Vector2<f32>, rotation: f32) -> Self {
+    fn new(position: Vector2<f32>, velocity: Vector2<f32>) -> Self {
         Self {
             position,
-            rotation,
+            velocity,
         }
     }
 
     fn update(&mut self) {
-        self.position.x += AGENT_SPEED * self.rotation.sin();
-        self.position.y += AGENT_SPEED * self.rotation.cos();
+        self.position += self.velocity * DT;
     }
 }

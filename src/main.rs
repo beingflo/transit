@@ -12,7 +12,7 @@ use ui::Ui;
 // White
 const BACKGROUND: u32 = 0xFFFFFF;
 
-const NUM_AGENT: u32 = 100;
+const NUM_AGENT: u32 = 1000;
 
 fn main() {
     let mut window = three::Window::builder("Transit").multisampling(8).build();
