@@ -1,4 +1,12 @@
 //use three;
+use rand;
+
+pub fn random_tuple(x_extent: f32, y_extent: f32) -> (f32, f32) {
+    let x = rand::random::<f32>() * 2.0 * x_extent - x_extent;
+    let y = rand::random::<f32>() * 2.0 * y_extent - y_extent;
+
+    (x,y)
+}
 
 //pub fn create_quad(window: &mut three::Window, scale: [f32; 2]) -> three::Mesh {
 //    let vertices = vec![

@@ -13,6 +13,7 @@ use ui::Ui;
 const BACKGROUND: u32 = 0xFFFFFF;
 
 const NUM_AGENT: u32 = 1000;
+const FOOD_RATE: u32 = 10;
 
 fn main() {
     let mut window = three::Window::builder("Transit").multisampling(8).build();
@@ -23,11 +24,13 @@ fn main() {
 
     window.scene.background = three::Background::Color(BACKGROUND);
 
-    let mut map = Map::new(&mut window, NUM_AGENT);
+    let mut map = Map::new(&mut window, NUM_AGENT, FOOD_RATE);
 
+    let mut tick = 0;
     while window.update() && !control.should_quit() {
         control.handle(&window);
-        map.update();
+
+        map.update(&mut window, tick);
         map.draw();
 
         ui.update(&window);
@@ -37,5 +40,7 @@ fn main() {
         }
 
         window.render(&camera);
+
+        tick += 1;
     }
 }
