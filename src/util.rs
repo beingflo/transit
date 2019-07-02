@@ -8,6 +8,10 @@ pub fn random_tuple(x_extent: f32, y_extent: f32) -> (f32, f32) {
     (x,y)
 }
 
+pub fn random_in_range(x: f32, y: f32) -> f32 {
+    rand::random::<f32>() * (y-x) + x
+}
+
 //pub fn create_quad(window: &mut three::Window, scale: [f32; 2]) -> three::Mesh {
 //    let vertices = vec![
 //        [-1.0, -1.0, 0.0].into(),

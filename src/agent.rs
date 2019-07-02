@@ -8,29 +8,39 @@ use super::map::MAX_SPAWN;
 
 const AGENT_SIZE: f32 = 0.1;
 const MAX_VEL: f32 = 1.0;
+const MAX_RANGE: f32 = 2.0;
 
 #[derive(Clone)]
 pub struct Agent {
     position: Vector2<f32>,
+
     velocity: Vector2<f32>,
+
+    range: f32,
+    vel: f32,
 
     mesh: Mesh,
 }
 
 impl Agent {
-    pub fn new(position: Vector2<f32>, velocity: Vector2<f32>, mesh: Mesh) -> Self {
+    pub fn new(position: Vector2<f32>, velocity: Vector2<f32>, range: f32, vel: f32, mesh: Mesh) -> Self {
         Self {
             position,
             velocity,
+            range,
+            vel,
             mesh,
         }
     }
 
     pub fn new_random(mesh: Mesh) -> Self {
         let (x, y) = util::random_tuple(MAX_SPAWN, MAX_SPAWN);
-        let (x_vel, y_vel) = util::random_tuple(MAX_VEL, MAX_VEL);
+        let (x_vel, y_vel) = util::random_tuple(1.0, 1.0);
 
-        Agent::new(Vector2::new(x,y), Vector2::new(x_vel, y_vel), mesh)
+        let range = util::random_in_range(0.0, MAX_RANGE);
+        let vel = util::random_in_range(0.0, MAX_VEL);
+
+        Agent::new(Vector2::new(x,y), Vector2::new(x_vel, y_vel), range, vel, mesh)
     }
 
     pub fn new_random_from_template(template: &Mesh, window: &mut three::Window) -> Self {
@@ -42,7 +52,7 @@ impl Agent {
     }
 
     pub fn update(&mut self, dt: f32) {
-        self.position += self.velocity * dt;
+        self.position += self.velocity * self.vel * dt;
     }
 
     pub fn draw(&self) {
