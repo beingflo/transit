@@ -10,8 +10,8 @@ const FOOD_SIZE: f32 = 0.05;
 
 #[derive(Clone)]
 pub struct Food {
-    position: Vector2<f32>,
-    energy: f32,
+    pub position: Vector2<f32>,
+    pub energy: f32,
 
     mesh: Mesh,
 }

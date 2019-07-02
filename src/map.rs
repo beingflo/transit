@@ -54,6 +54,11 @@ impl Map {
 
     pub fn update(&mut self, window: &mut three::Window, dt: f32) {
         for a in self.agents.iter_mut() {
+            let food = a.nearest_food(&self.food);
+            if a.in_range(food) {
+                a.accelerate_towards(&food.position);
+            }
+
             a.update(dt);
         }
 
