@@ -2,6 +2,8 @@ mod control;
 mod map;
 mod ui;
 mod util;
+mod agent;
+mod food;
 
 use three;
 
@@ -13,7 +15,7 @@ use ui::Ui;
 const BACKGROUND: u32 = 0xFFFFFF;
 
 const NUM_AGENT: u32 = 1000;
-const FOOD_RATE: u32 = 10;
+const FOOD_RATE: u32 = 1;
 
 fn main() {
     let mut window = three::Window::builder("Transit").multisampling(8).build();
@@ -26,11 +28,11 @@ fn main() {
 
     let mut map = Map::new(&mut window, NUM_AGENT, FOOD_RATE);
 
-    let mut tick = 0;
     while window.update() && !control.should_quit() {
+        let dt = window.input.delta_time();
         control.handle(&window);
 
-        map.update(&mut window, tick);
+        map.update(&mut window, dt);
         map.draw();
 
         ui.update(&window);
@@ -40,7 +42,5 @@ fn main() {
         }
 
         window.render(&camera);
-
-        tick += 1;
     }
 }
