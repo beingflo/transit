@@ -9,7 +9,7 @@ use super::food::Food;
 use super::map::MAX_SPAWN;
 
 const AGENT_SIZE: f32 = 0.1;
-const INIT_ENERGY: f32 = 100.0;
+const INIT_ENERGY: f32 = 10.0;
 const MAX_VEL: f32 = 1.0;
 const MAX_RANGE: f32 = 2.0;
 
@@ -61,9 +61,13 @@ impl Agent {
     }
 
     pub fn update(&mut self, dt: f32) {
-        self.velocity += self.acceleration;
-        self.velocity = self.velocity.normalize();
-        self.position += self.velocity * self.vel * dt;
+        if self.energy > 0.0 {
+            self.velocity += self.acceleration;
+            self.velocity = self.velocity.normalize();
+            self.position += self.velocity * self.vel * dt;
+
+            self.energy -= dt;
+        }
     }
 
     pub fn draw(&self) {

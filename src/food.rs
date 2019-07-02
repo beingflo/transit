@@ -7,6 +7,7 @@ use super::util;
 use super::map::MAX_SPAWN;
 
 const FOOD_SIZE: f32 = 0.05;
+const FOOD_ENERGY: f32 = 2.0;
 
 #[derive(Clone)]
 pub struct Food {
@@ -23,7 +24,7 @@ impl Food {
 
     pub fn new_random(mesh: Mesh) -> Self {
         let (x, y) = util::random_tuple(MAX_SPAWN, MAX_SPAWN);
-        let e = rand::random::<f32>();
+        let e = rand::random::<f32>() * FOOD_ENERGY;
 
         Food::new(Vector2::new(x,y), e, mesh)
     }
@@ -45,3 +46,8 @@ impl Food {
     }
 }
 
+impl Drop for Food {
+    fn drop(&mut self) {
+        self.mesh.set_position([0.0, 0.0, 0.0]);
+    }
+}

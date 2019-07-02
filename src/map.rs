@@ -56,6 +56,7 @@ impl Map {
     }
 
     pub fn update(&mut self, window: &mut three::Window, dt: f32) {
+        let mut max_energy = 0.0;
         for a in self.agents.iter_mut() {
             let food_idx = a.nearest_food(&self.food);
             let dist = a.position.distance(self.food[food_idx].position);
@@ -70,7 +71,11 @@ impl Map {
                 a.energy += self.food[food_idx].energy;
                 self.food.remove(food_idx);
             }
+
+            max_energy = if a.energy > max_energy { a.energy } else { max_energy };
         }
+
+        println!("{}", max_energy);
 
         for f in self.food.iter_mut() {
             f.update(dt);
