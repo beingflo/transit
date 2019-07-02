@@ -9,6 +9,7 @@ use super::food::Food;
 use super::map::MAX_SPAWN;
 
 const AGENT_SIZE: f32 = 0.1;
+const INIT_ENERGY: f32 = 100.0;
 const MAX_VEL: f32 = 1.0;
 const MAX_RANGE: f32 = 2.0;
 
@@ -17,12 +18,13 @@ const ACCEL: f32 = 0.1;
 #[derive(Clone)]
 pub struct Agent {
     pub position: Vector2<f32>,
+    pub energy: f32,
 
     pub velocity: Vector2<f32>,
     pub acceleration: Vector2<f32>,
 
-    range: f32,
-    vel: f32,
+    pub range: f32,
+    pub vel: f32,
 
     mesh: Mesh,
 }
@@ -31,6 +33,7 @@ impl Agent {
     pub fn new(position: Vector2<f32>, velocity: Vector2<f32>, acceleration: Vector2<f32>, range: f32, vel: f32, mesh: Mesh) -> Self {
         Self {
             position,
+            energy: INIT_ENERGY,
             velocity,
             acceleration,
             range,
@@ -69,7 +72,7 @@ impl Agent {
         self.mesh.set_orientation(rot);
     }
 
-    pub fn nearest_food<'a>(&self, food: &'a Vec<Food>) -> &'a Food {
+    pub fn nearest_food(&self, food: &Vec<Food>) -> usize {
         let mut min_dist = std::f32::MAX;
         let mut min_idx = 0;
 
@@ -81,11 +84,7 @@ impl Agent {
             }
         }
 
-        &food[min_idx]
-    }
-
-    pub fn in_range(&self, food: &Food) -> bool {
-        self.position.distance(food.position) < self.range
+        min_idx
     }
 
     pub fn accelerate_towards(&mut self, target: &Vector2<f32>) {

@@ -1,7 +1,10 @@
 use super::agent::Agent;
 use super::food::Food;
 
+use cgmath::MetricSpace;
+
 pub const MAX_SPAWN: f32 = 20.0;
+const EATING_RANGE: f32 = 0.1;
 
 #[derive(Clone)]
 pub struct Map {
@@ -54,12 +57,19 @@ impl Map {
 
     pub fn update(&mut self, window: &mut three::Window, dt: f32) {
         for a in self.agents.iter_mut() {
-            let food = a.nearest_food(&self.food);
-            if a.in_range(food) {
-                a.accelerate_towards(&food.position);
+            let food_idx = a.nearest_food(&self.food);
+            let dist = a.position.distance(self.food[food_idx].position);
+
+            if dist < a.range {
+                a.accelerate_towards(&self.food[food_idx].position);
             }
 
             a.update(dt);
+
+            if dist < EATING_RANGE {
+                a.energy += self.food[food_idx].energy;
+                self.food.remove(food_idx);
+            }
         }
 
         for f in self.food.iter_mut() {
