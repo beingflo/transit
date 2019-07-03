@@ -25,7 +25,7 @@ impl Map {
         let quad = three::Geometry::cuboid(1.0, 2.0, 0.5);
 
         let agent_template = window.factory.mesh(quad, material);
-        let range_template = util::create_circle(window, 36);
+        let range_template = util::create_circle(window, 12);
 
         // Set up Agents
         let mut agents = Vec::new();
@@ -60,22 +60,31 @@ impl Map {
 
     pub fn update(&mut self, window: &mut three::Window, dt: f32) {
         let mut max_energy = 0.0;
-        for a in self.agents.iter_mut() {
-            let food_idx = a.nearest_food(&self.food);
-            let dist = a.position.distance(self.food[food_idx].position);
+        let mut agent_idx = 0;
+        while agent_idx < self.agents.len() {
+            let agent = &mut self.agents[agent_idx];
+            let food_idx = agent.nearest_food(&self.food);
+            let dist = agent.position.distance(self.food[food_idx].position);
 
-            if dist < a.range {
-                a.accelerate_towards(&self.food[food_idx].position);
+            if dist < agent.range {
+                agent.accelerate_towards(&self.food[food_idx].position);
             }
 
-            a.update(dt);
-
             if dist < EATING_RANGE {
-                a.energy += self.food[food_idx].energy;
+                agent.energy += self.food[food_idx].energy;
+                self.food[food_idx].remove(window);
                 self.food.remove(food_idx);
             }
 
-            max_energy = if a.energy > max_energy { a.energy } else { max_energy };
+            agent.update(dt);
+            max_energy = if agent.energy > max_energy { agent.energy } else { max_energy };
+
+            if agent.energy <= 0.0 {
+                self.agents[agent_idx].remove(window);
+                self.agents.remove(agent_idx);
+            }
+
+            agent_idx += 1;
         }
 
         println!("{}", max_energy);

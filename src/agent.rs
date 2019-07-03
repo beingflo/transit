@@ -11,7 +11,7 @@ use super::map::MAX_SPAWN;
 const AGENT_SIZE: f32 = 0.1;
 const INIT_ENERGY: f32 = 10.0;
 const MAX_VEL: f32 = 1.0;
-const MAX_RANGE: f32 = 2.0;
+const MAX_RANGE: f32 = 1.0;
 
 const ACCEL: f32 = 0.3;
 
@@ -67,13 +67,11 @@ impl Agent {
     }
 
     pub fn update(&mut self, dt: f32) {
-        if self.energy > 0.0 {
-            self.velocity += self.acceleration;
-            self.velocity = self.velocity.normalize();
-            self.position += self.velocity * self.vel * dt;
+        self.velocity += self.acceleration;
+        self.velocity = self.velocity.normalize();
+        self.position += self.velocity * self.vel * dt;
 
-            self.energy -= dt;
-        }
+        self.energy -= dt;
     }
 
     pub fn draw(&self, draw_range: bool) {
@@ -105,5 +103,10 @@ impl Agent {
         let diff = target - self.position;
 
         self.acceleration = diff.normalize() * ACCEL;
+    }
+
+    pub fn remove(&self, window: &mut three::Window) {
+        window.scene.remove(&self.mesh);
+        window.scene.remove(&self.range_mesh);
     }
 }

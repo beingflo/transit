@@ -44,10 +44,8 @@ impl Food {
     pub fn draw(&self) {
         self.mesh.set_position([self.position.x, self.position.y, 0.0]);
     }
-}
 
-impl Drop for Food {
-    fn drop(&mut self) {
-        self.mesh.set_position([0.0, 0.0, 0.0]);
+    pub fn remove(&self, window: &mut three::Window) {
+        window.scene.remove(&self.mesh);
     }
 }
