@@ -5,9 +5,9 @@ use cgmath::Vector2;
 
 use super::util;
 use super::map::MAX_SPAWN;
+use super::map::FOOD_ENERGY;
 
 const FOOD_SIZE: f32 = 0.05;
-const FOOD_ENERGY: f32 = 2.0;
 
 #[derive(Clone)]
 pub struct Food {

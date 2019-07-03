@@ -4,6 +4,7 @@ mod ui;
 mod util;
 mod agent;
 mod food;
+mod timer;
 
 use three;
 
@@ -15,7 +16,6 @@ use ui::Ui;
 const BACKGROUND: u32 = 0xFFFFFF;
 
 const NUM_AGENT: u32 = 1000;
-const FOOD_RATE: u32 = 1;
 
 fn main() {
     let mut window = three::Window::builder("Transit").multisampling(8).build();
@@ -26,7 +26,7 @@ fn main() {
 
     window.scene.background = three::Background::Color(BACKGROUND);
 
-    let mut map = Map::new(&mut window, NUM_AGENT, FOOD_RATE);
+    let mut map = Map::new(&mut window, NUM_AGENT);
 
     while window.update() && !control.should_quit() {
         let dt = window.input.delta_time();

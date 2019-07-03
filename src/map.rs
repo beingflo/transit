@@ -4,23 +4,30 @@ use super::food::Food;
 use cgmath::MetricSpace;
 
 use super::util;
+use super::timer::Timer;
 
-pub const MAX_SPAWN: f32 = 20.0;
+pub const MAX_SPAWN: f32 = 50.0;
 const EATING_RANGE: f32 = 0.1;
+pub const INIT_ENERGY: f32 = 10.0;
+pub const BUDGET: f32 = 5.0;
+pub const FOOD_ENERGY: f32 = 2.0;
+pub const REPRO_RATE: f32 = 10.0;
+const FOOD_RATE: u32 = 10;
 
 #[derive(Clone)]
 pub struct Map {
     agents: Vec<Agent>,
     food: Vec<Food>,
 
-    food_rate: u32,
+    population_timer: Timer,
 
     agent_template: three::Mesh,
+    range_template: three::Mesh,
     food_template: three::Mesh,
 }
 
 impl Map {
-    pub fn new(window: &mut three::Window, num_agent: u32, food_rate: u32) -> Self {
+    pub fn new(window: &mut three::Window, num_agent: u32) -> Self {
         let material = three::material::Line { color: 0x000000 };
         let quad = three::Geometry::cuboid(1.0, 2.0, 0.5);
 
@@ -42,7 +49,7 @@ impl Map {
         // Spawn 100 ticks worth of food
         let mut food = Vec::new();
         for _ in 0..100 {
-            for _ in 0..food_rate {
+            for _ in 0..FOOD_RATE {
                 food.push(Food::new_random_from_template(&food_template, window));
             }
         }
@@ -51,15 +58,19 @@ impl Map {
             agents,
             food,
 
-            food_rate,
+            population_timer: Timer::new(1.0),
 
             agent_template,
+            range_template,
             food_template,
         }
     }
 
     pub fn update(&mut self, window: &mut three::Window, dt: f32) {
-        let mut max_energy = 0.0;
+        if self.population_timer.tick(dt) {
+            println!("Agents: {}\t Food: {}", self.agents.len(), self.food.len());
+        }
+
         let mut agent_idx = 0;
         while agent_idx < self.agents.len() {
             let agent = &mut self.agents[agent_idx];
@@ -76,10 +87,34 @@ impl Map {
                 self.food.remove(food_idx);
             }
 
-            agent.update(dt);
-            max_energy = if agent.energy > max_energy { agent.energy } else { max_energy };
+            let spawn = agent.update(dt);
 
-            if agent.energy <= 0.0 {
+            if spawn {
+                let mut offspring = Agent::new_from_copy(agent, &self.agent_template, &self.range_template, window);
+                agent.energy -= INIT_ENERGY;
+
+                let mutation = util::random_in_range(0.9, 1.1);
+                offspring.fertility *= mutation;
+                if offspring.fertility > 1.0 {
+                    offspring.fertility = 1.0;
+                }
+
+                let mutation = util::random_in_range(-0.1, 0.1);
+                if mutation >= 0.0 && offspring.range >= mutation {
+                    offspring.vel += mutation;
+                    offspring.range -= mutation;
+                }
+                if mutation < 0.0 && offspring.vel >= mutation {
+                    offspring.vel += mutation;
+                    offspring.range -= mutation;
+                }
+
+
+                self.agents.push(offspring);
+            }
+
+
+            if self.agents[agent_idx].energy <= 0.0 {
                 self.agents[agent_idx].remove(window);
                 self.agents.remove(agent_idx);
             }
@@ -87,13 +122,11 @@ impl Map {
             agent_idx += 1;
         }
 
-        println!("{}", max_energy);
-
         for f in self.food.iter_mut() {
             f.update(dt);
         }
 
-        for _ in 0..self.food_rate {
+        for _ in 0..FOOD_RATE {
             self.food.push(Food::new_random_from_template(&self.food_template, window));
         }
     }
