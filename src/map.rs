@@ -3,6 +3,8 @@ use super::food::Food;
 
 use cgmath::MetricSpace;
 
+use super::util;
+
 pub const MAX_SPAWN: f32 = 20.0;
 const EATING_RANGE: f32 = 0.1;
 
@@ -23,11 +25,12 @@ impl Map {
         let quad = three::Geometry::cuboid(1.0, 2.0, 0.5);
 
         let agent_template = window.factory.mesh(quad, material);
+        let range_template = util::create_circle(window, 36);
 
         // Set up Agents
         let mut agents = Vec::new();
         for _ in 0..num_agent {
-            agents.push(Agent::new_random_from_template(&agent_template, window));
+            agents.push(Agent::new_random_from_template(&agent_template, &range_template, window));
         }
 
         let food_material = three::material::Basic { color: three::color::BLUE, map: None };
@@ -88,7 +91,7 @@ impl Map {
 
     pub fn draw(&self) {
         for agent in self.agents.iter() {
-            agent.draw();
+            agent.draw(true);
         }
 
         for f in self.food.iter() {
