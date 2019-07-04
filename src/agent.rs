@@ -14,7 +14,7 @@ use super::map::BUDGET;
 
 const AGENT_SIZE: f32 = 0.1;
 
-const ACCEL: f32 = 1.0;
+const ACCEL: f32 = 0.5;
 
 #[derive(Clone)]
 pub struct Agent {

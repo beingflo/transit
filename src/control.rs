@@ -21,7 +21,7 @@ pub struct Control<'a, T: three::Object> {
 
 impl<'a, T: three::Object> Control<'a, T> {
     pub fn new(object: &'a T) -> Self {
-        let camera_position = [0.0, 0.0, 2.0];
+        let camera_position = [0.0, -10.0, 10.0];
         let camera_lookat = [0.0, 1.0, -1.0];
 
         object.set_position(camera_position);
