@@ -9,10 +9,10 @@ use super::timer::Timer;
 pub const MAX_SPAWN: f32 = 50.0;
 const EATING_RANGE: f32 = 0.1;
 pub const INIT_ENERGY: f32 = 10.0;
-pub const BUDGET: f32 = 2.0;
+pub const BUDGET: f32 = 3.0;
 pub const FOOD_ENERGY: f32 = 2.0;
 pub const REPRO_RATE: f32 = 1.0;
-const FOOD_RATE: u32 = 4;
+const FOOD_RATE: u32 = 10;
 
 #[derive(Clone)]
 pub struct Map {

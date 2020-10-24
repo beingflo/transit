@@ -5,7 +5,7 @@ authors = ["Florian Marending <marending.florian@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-three = "0.4.0"
-cgmath = { version = "0.17.0", features = ["mint"] }
+three = "*"
+cgmath = { version = "*", features = ["mint"] }
 rand = "*"
-spade = "1.7.0"
+spade = "*"
